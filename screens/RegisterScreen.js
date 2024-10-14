@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
-import { Button, Avatar } from 'react-native-paper';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  ScrollView,
+} from "react-native";
+import { Button, Avatar } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
 
-export default function SignUpScreen() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [address, setAddress] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function RegisterScreen() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const navigation = useNavigation();
 
   const handleProfilePicture = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -26,7 +36,7 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = () => {
-    console.log('Sign Up Pressed');
+    console.log("Sign Up Pressed");
     // Add sign-up logic here
   };
 
@@ -87,7 +97,11 @@ export default function SignUpScreen() {
       />
 
       {/* Sign Up Button */}
-      <Button mode="contained" onPress={handleSignUp} style={styles.signUpButton}>
+      <Button
+        mode="contained"
+        onPress={handleSignUp}
+        style={styles.signUpButton}
+      >
         Sign Up
       </Button>
 
@@ -96,7 +110,7 @@ export default function SignUpScreen() {
         mode="outlined"
         style={styles.googleButton}
         icon="google"
-        onPress={() => console.log('Continue with Google pressed')}
+        onPress={() => console.log("Continue with Google pressed")}
       >
         Continue with Google
       </Button>
@@ -104,7 +118,7 @@ export default function SignUpScreen() {
       <View style={styles.signInContainer}>
         <Text style={styles.signInText}>Already have an account?</Text>
         <TouchableOpacity>
-          <Text style={styles.signInLink}>Sign In</Text>
+          <Text style={styles.signInLink} onPress={() => navigation.navigate("Login")}>Sign In</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -114,41 +128,41 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    paddingBottom: 50,  // Extra padding for scrolling
+    paddingBottom: 50, // Extra padding for scrolling
   },
   title: {
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 30,
   },
   input: {
-    width: '100%',
+    width: "100%",
     height: 50,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: "#f1f1f1",
     borderRadius: 8,
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 20,
-    color: '#333',
+    color: "#333",
   },
   signUpButton: {
-    width: '100%',
-    backgroundColor: '#3498db',
+    width: "100%",
+    backgroundColor: "#3498db",
     paddingVertical: 10,
     borderRadius: 8,
-    marginBottom: 20,  // Space between buttons
+    marginBottom: 20, // Space between buttons
   },
   googleButton: {
-    width: '100%',
-    borderColor: '#DB4437',
+    width: "100%",
+    borderColor: "#DB4437",
     borderWidth: 1,
   },
   signInContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 20,
     marginBottom: 50, // Extra space at bottom
   },
@@ -156,9 +170,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   signInLink: {
-    color: '#3498db',
+    color: "#3498db",
     marginLeft: 5,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
