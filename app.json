@@ -1,8 +1,10 @@
 {
   "expo": {
     "name": "BOVO",
+    "platforms": ["ios", "android", "web"],
     "slug": "BOVO",
     "version": "1.0.0",
+    "plugins": ["@react-native-google-signin/google-signin"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,13 +17,20 @@
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.tupt.bovo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "866a97ec-6522-48ed-98e4-e8a4e3512b43"
+      }
     }
   }
 }

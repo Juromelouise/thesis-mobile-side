@@ -2,13 +2,28 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
 import { BASE_URL } from "../config";
-import * as AuthSession from "expo-auth-session";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import auth from "@react-native-firebase/auth";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
+  const [userData, setUserData] = useState({
+    given_name: "",
+    family_name: "",
+    email: "",
+    picture: "",
+  });
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
+      offlineAccess: true,
+    });
+  }, []);
 
   const login = (email, password) => {
     setIsLoading(true);
@@ -30,22 +45,44 @@ export const AuthProvider = ({ children }) => {
       });
   };
 
-  const googleLogin = async () => {
+  const googleLogin = () => {
     setIsLoading(true);
-    const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
-    const authUrl = `${BASE_URL}/auth/google?redirect_uri=${redirectUri}`;
 
-    let result = await AuthSession.startAsync({ authUrl });
+    GoogleSignin.signIn()
+      .then(({ data }) => {
+        console.log(data);
+        const googleCredential = auth.GoogleAuthProvider.credential(
+          data.idToken
+        );
 
-    if (result.type === "success") {
-      console.log(result.params);
-      // Handle token reception and storage
-      AsyncStorage.setItem("userToken", result.params.token);
-      setUserToken(result.params.token);
-    } else {
-      console.log("Login failed");
-    }
-    setIsLoading(false);
+        return auth()
+          .signInWithCredential(googleCredential)
+          .then((userCredential) => {
+            const user = {
+              given_name: data.user.givenName,
+              family_name: data.user.familyName,
+              email: data.user.email,
+              picture: data.user.photo,
+            };
+            setUserData(user);
+
+            return axios.post(`${BASE_URL}/auth/mobile/auth`, user);
+          });
+      })
+      .then((response) => {
+        console.log(response.data);
+        return AsyncStorage.setItem("userToken", response.data.token).then(
+          () => {
+            setUserToken(response.data.token);
+          }
+        );
+      })
+      .catch((error) => {
+        console.log("Google login error:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const logout = () => {
@@ -55,9 +92,12 @@ export const AuthProvider = ({ children }) => {
         console.log("No user is logged in.");
         return;
       }
+
       axios.get(`${BASE_URL}/user/logout`);
       AsyncStorage.removeItem("userToken");
       setUserToken(null);
+      GoogleSignin.signOut();
+      GoogleSignin.revokeAccess();
       console.log("User logged out successfully.");
     } catch (error) {
       console.log(`Logout error: ${error}`);
@@ -65,6 +105,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
+
   const isLoggedIn = async () => {
     try {
       setIsLoading(true);
