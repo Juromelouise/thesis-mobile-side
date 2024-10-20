@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         console.log(res.data);
         setUserToken(res.data.token);
         AsyncStorage.setItem("userToken", res.data.token);
+        AsyncStorage.setItem("user", response.data);
       })
       .catch((e) => {
         console.log(`Login error ${e}`);
@@ -48,40 +49,46 @@ export const AuthProvider = ({ children }) => {
   const googleLogin = () => {
     setIsLoading(true);
 
-    GoogleSignin.signIn()
-      .then(({ data }) => {
-        console.log(data);
-        const googleCredential = auth.GoogleAuthProvider.credential(
-          data.idToken
-        );
+    GoogleSignin.hasPlayServices()
+      .then(() => {
+        GoogleSignin.signIn()
+          .then(({ data }) => {
+            console.log(data);
+            const googleCredential = auth.GoogleAuthProvider.credential(
+              data.idToken
+            );
 
-        return auth()
-          .signInWithCredential(googleCredential)
-          .then((userCredential) => {
-            const user = {
-              given_name: data.user.givenName,
-              family_name: data.user.familyName,
-              email: data.user.email,
-              picture: data.user.photo,
-            };
-            setUserData(user);
-
-            return axios.post(`${BASE_URL}/auth/mobile/auth`, user);
+            return auth()
+              .signInWithCredential(googleCredential)
+              .then((userCredential) => {
+                const user = {
+                  given_name: data.user.givenName,
+                  family_name: data.user.familyName,
+                  email: data.user.email,
+                  picture: data.user.photo,
+                };
+                setUserData(user);
+                return axios.post(`${BASE_URL}/auth/mobile/auth`, user);
+              });
+          })
+          .then((response) => {
+            console.log(response.data);
+            return AsyncStorage.setItem("userToken", response.data.token).then(
+              () => {
+                setUserToken(response.data.token);
+                AsyncStorage.setItem("user", response.data);
+              }
+            );
+          })
+          .catch((error) => {
+            console.log("Google login error:", error);
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
       })
-      .then((response) => {
-        console.log(response.data);
-        return AsyncStorage.setItem("userToken", response.data.token).then(
-          () => {
-            setUserToken(response.data.token);
-          }
-        );
-      })
-      .catch((error) => {
-        console.log("Google login error:", error);
-      })
-      .finally(() => {
-        setIsLoading(false);
+      .catch((e) => {
+        console.log(e);
       });
   };
 
@@ -97,7 +104,7 @@ export const AuthProvider = ({ children }) => {
       AsyncStorage.removeItem("userToken");
       setUserToken(null);
       GoogleSignin.signOut();
-      GoogleSignin.revokeAccess();
+      // GoogleSignin.revokeAccess();
       console.log("User logged out successfully.");
     } catch (error) {
       console.log(`Logout error: ${error}`);
