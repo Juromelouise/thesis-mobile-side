@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "642593357289",
+    "project_id": "thesis-434709",
+    "storage_bucket": "thesis-434709.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642593357289:android:bb72f169c7986682d39f78",
+        "android_client_info": {
+          "package_name": "com.tupt.bovo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "642593357289-pepi0un1jnotdi65b1tc6u5plhl7vu01.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tupt.bovo",
+            "certificate_hash": "2f26c95192bf05b3c5bd9acf2d5e43e939682192"
+          }
+        },
+        {
+          "client_id": "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHcPeOs4cCX8BD-7ZjDs-DHLSZewfCKdA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "642593357289-0gkkf932lmpsfbl67atgb7cu793vbusn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
