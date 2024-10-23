@@ -6,10 +6,10 @@
     "version": "1.0.0",
     "plugins": ["@react-native-google-signin/google-signin"],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/BOVO_logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/BOVO_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,13 +19,13 @@
     "android": {
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/BOVO_logo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.tupt.bovo"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/BOVO_logo.png"
     },
     "extra": {
       "eas": {

@@ -36,7 +36,8 @@ export const AuthProvider = ({ children }) => {
         console.log(res.data);
         setUserToken(res.data.token);
         AsyncStorage.setItem("userToken", res.data.token);
-        AsyncStorage.setItem("user", response.data);
+        // AsyncStorage.setItem("user", response.data);
+        console.log
       })
       .catch((e) => {
         console.log(`Login error ${e}`);

@@ -27,6 +27,16 @@ const CustomDrawerContent = ({ navigation }) => {
         <Text style={styles.drawerButtonText}>Home</Text>
       </TouchableOpacity>
 
+      {/*Profile*/}
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Profile");
+        }}
+        style={styles.drawerButton}
+      >
+        <Text style={styles.drawerButtonText}>Profile</Text>
+      </TouchableOpacity>
+
       {/* Report */}
       <TouchableOpacity
         onPress={() => {
@@ -44,7 +54,9 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={[styles.drawerButton, styles.logoutButton]}
       >
-        <Text style={[styles.drawerButtonText, styles.logoutButtonText]}>Logout</Text>
+        <Text style={[styles.drawerButtonText, styles.logoutButtonText]}>
+          Logout
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -66,6 +78,11 @@ const DrawerNavigation = () => {
           name="Report"
           component={Navigator}
           initialParams={{ screen: "ReportScreen" }}
+        />
+        <Drawer.Screen
+          name="Profile"
+          component={Navigator}
+          initialParams={{ screen: "ProfileScreen" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>
@@ -96,8 +113,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 20,
     borderRadius: 8,
-    elevation: 2, 
-    shadowColor: "#000", 
+    elevation: 2,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
