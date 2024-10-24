@@ -1,17 +1,37 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { Avatar, Title, Text, Button, Divider, List } from "react-native-paper";
+import { FontAwesome } from "@expo/vector-icons"; // Corrected import
+import axios from "axios";
+import { BASE_URL } from "../../config";
 
 const ProfileScreen = () => {
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/user/profile`).then((response) => {
+      setUser(response.data.user);
+      console.log(response.data.user)
+    }).catch((error) => {
+      console.error("Error fetching profile data: ", error);
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Avatar.Image
-          size={120}
-          source={{ uri: "https://example.com/your-profile-pic.jpg" }}
-        />
-        <Title style={styles.title}>John Doe</Title>
-        <Text style={styles.caption}>@johndoe</Text>
+        {user.avatar ? (
+          <Avatar.Image size={120} source={{ uri: user.avatar }} />
+        ) : (
+          <FontAwesome name="user-circle" size={120} />
+        )}
+        <Title style={styles.title}>
+          {user.firstName} {user.lastName}
+        </Title>
+        <Text style={styles.caption}>
+          <Text style={{ fontWeight: "bold" }}>Since: </Text>
+          {user.createdAt ? user.createdAt.split("T")[0] : "N/A"}
+        </Text>
       </View>
 
       <Divider style={styles.divider} />
@@ -20,17 +40,17 @@ const ProfileScreen = () => {
         <List.Section>
           <List.Item
             title="Email"
-            description="john.doe@example.com"
+            description={user.email || "N/A"} 
             left={() => <List.Icon icon="email" />}
           />
           <List.Item
             title="Phone"
-            description="+1 (123) 456-7890"
+            description={user.phoneNumber || "N/A"} 
             left={() => <List.Icon icon="phone" />}
           />
           <List.Item
             title="Location"
-            description="San Francisco, CA"
+            description={user.address || "N/A"} 
             left={() => <List.Icon icon="map-marker" />}
           />
         </List.Section>
