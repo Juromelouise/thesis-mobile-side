@@ -18,9 +18,7 @@ export const setFormData = async (values) => {
 
   Object.entries(values).forEach(([key, value]) => {
     if (Array.isArray(value)) {
-      for (let i in value) {
-        formData.append(key, value[i]);
-      }
+      value.forEach((item) => formData.append(key, item));
     } else {
       formData.append(key, value);
     }

@@ -15,10 +15,11 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { BASE_URL } from "../../config";
 import axios from "axios";
+import { setFormData } from "../../utils/formData";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
-  const [description, setDescription] = useState("")
+  const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [plate, setPlate] = useState("");
@@ -40,7 +41,7 @@ export default function ReportScreen() {
   };
 
   const getLocation = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -49,12 +50,10 @@ export default function ReportScreen() {
         return;
       }
 
-      // Get the precise location with high accuracy
       let loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
 
-      // Perform reverse geocoding
       const reverseGeocode = await Location.reverseGeocodeAsync({
         latitude: loc.coords.latitude,
         longitude: loc.coords.longitude,
@@ -68,7 +67,7 @@ export default function ReportScreen() {
     } catch (error) {
       console.error("Error fetching location:", error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -89,9 +88,13 @@ export default function ReportScreen() {
           name: "plate_number.jpg",
         });
 
-        const response = await axios.post(`${BASE_URL}/report/post`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await axios.post(
+          `${BASE_URL}/extract/text`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
         setPlate(response.data.extractedText);
       } catch (error) {
         console.error("Error uploading image:", error);
@@ -100,27 +103,29 @@ export default function ReportScreen() {
   };
 
   const handleSubmit = async () => {
-    // const user = {
-    //   name: name,
-    //   email: email,
-    //   image: image,
-    // };
+    const report = {
+      description: description,
+      location: address,
+    };
 
-    // const formData = await setFormData(user);
+    const formData = await setFormData(report);
+
+    console.log(formData)
 
     // const config = {
-    //   headers: {
-    //     "Content-Type": "multipart/form-data",
-    //     Authorization: `${token}`,
-    //   },
+    //   headers: { "Content-Type": "multipart/form-data" },
     // };
 
-    // axios
-    //   .put(`${baseurl}update/user/profile`, formData, config)
-    //   .then((res) => {
-    //     navigation.replace("Main");
-    //   })
-    //   .catch((error) => console.log(error.response));
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/report/post/report`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log("Response:", response.data);
+    } catch (error) {
+      console.error("Error on reportScreen:", error);
+    }
   };
 
   return (
@@ -171,7 +176,7 @@ export default function ReportScreen() {
               placeholder="Plate Number"
               placeholderTextColor="#aaa"
               value={plate}
-              onChange={setPlate}
+              onChangeText={setPlate}
             />
             <TouchableOpacity
               style={styles.cameraButton}
@@ -187,8 +192,7 @@ export default function ReportScreen() {
               placeholder="Location"
               placeholderTextColor="#aaa"
               value={address}
-              onChange={setAddress}
-              // editable={false}
+              onChangeText={setAddress}
             />
             <TouchableOpacity
               style={styles.locationButton}
@@ -204,7 +208,7 @@ export default function ReportScreen() {
             placeholderTextColor="#aaa"
             multiline
             value={description}
-            onChange={setDescription}
+            onChangeText={setDescription}
             numberOfLines={4}
           />
 
@@ -214,7 +218,6 @@ export default function ReportScreen() {
         </View>
       </ScrollView>
 
-      {/* Loading Indicator with Translucent Background */}
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#6e44ff" />
