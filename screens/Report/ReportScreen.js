@@ -8,12 +8,20 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Camera icon
-import * as ImagePicker from "expo-image-picker"; // To access the camera and photo library
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import { BASE_URL } from "../../config";
+import axios from "axios";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
+  const [description, setDescription] = useState("")
+  const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [plate, setPlate] = useState("");
 
   const pickImage = async () => {
     let result = await ImagePicker.launchCameraAsync({
@@ -23,32 +31,105 @@ export default function ReportScreen() {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      // Update state and log the new state after update
       setImages((prevImages) => {
         const updatedImages = [...prevImages, result.assets[0].uri].slice(0, 4);
-        console.log("Updated images:", updatedImages); // Log the updated array
+        console.log("Updated images:", updatedImages);
         return updatedImages;
       });
     }
   };
 
-  // useEffect(() => {
-  //   // setImages([])
-  //   console.log(images);
-  // }, []);
+  const getLocation = async () => {
+    setLoading(true); // Start loading
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access location was denied");
+        setLoading(false);
+        return;
+      }
+
+      // Get the precise location with high accuracy
+      let loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      // Perform reverse geocoding
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+
+      if (reverseGeocode.length > 0) {
+        const { street, city, region } = reverseGeocode[0];
+        setAddress(`${street}, ${city}, ${region}`);
+        console.log("Address:", `${street}, ${city}, ${region}`);
+      }
+    } catch (error) {
+      console.error("Error fetching location:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const pickImageAndUpload = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [8, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+      try {
+        const formData = new FormData();
+        formData.append("imageReport", {
+          uri: imageUri,
+          type: "image/jpg",
+          name: "plate_number.jpg",
+        });
+
+        const response = await axios.post(`${BASE_URL}/report/post`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        setPlate(response.data.extractedText);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    // const user = {
+    //   name: name,
+    //   email: email,
+    //   image: image,
+    // };
+
+    // const formData = await setFormData(user);
+
+    // const config = {
+    //   headers: {
+    //     "Content-Type": "multipart/form-data",
+    //     Authorization: `${token}`,
+    //   },
+    // };
+
+    // axios
+    //   .put(`${baseurl}update/user/profile`, formData, config)
+    //   .then((res) => {
+    //     navigation.replace("Main");
+    //   })
+    //   .catch((error) => console.log(error.response));
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
-        {/* <Text style={styles.headerText}>VioApp</Text> */}
-
-        {/* Report Section */}
         <View style={styles.reportSection}>
           <Text style={styles.reportText}>Report</Text>
 
-          {/* Images Container */}
           <View style={styles.imagesContainer}>
-            {/* First Image or Camera Icon */}
             <TouchableOpacity
               style={styles.imagePlaceholder}
               onPress={pickImage}
@@ -60,7 +141,6 @@ export default function ReportScreen() {
               )}
             </TouchableOpacity>
 
-            {/* Second Image or Camera Icon with Opacity if more images */}
             <TouchableOpacity
               style={[
                 styles.imagePlaceholder,
@@ -85,45 +165,61 @@ export default function ReportScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Plate Number Input */}
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
               placeholder="Plate Number"
               placeholderTextColor="#aaa"
+              value={plate}
+              onChange={setPlate}
             />
-            <TouchableOpacity style={styles.clearButton}>
-              <Text style={styles.clearButtonText}>X</Text>
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={pickImageAndUpload}
+            >
+              <Ionicons name="camera" size={24} color="#000" />
             </TouchableOpacity>
           </View>
 
-          {/* Location Input */}
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
               placeholder="Location"
               placeholderTextColor="#aaa"
+              value={address}
+              onChange={setAddress}
+              // editable={false}
             />
-            <TouchableOpacity style={styles.locationButton}>
-              <Text style={styles.locationIcon}>📍</Text>
+            <TouchableOpacity
+              style={styles.locationButton}
+              onPress={getLocation}
+            >
+              <MaterialIcons name="my-location" size={20} color="#000" />
             </TouchableOpacity>
           </View>
 
-          {/* Reason Text Area */}
           <TextInput
             style={[styles.input, styles.reasonInput]}
             placeholder="Reason"
             placeholderTextColor="#aaa"
             multiline
-            numberOfLines={4} // Shrink Reason input area a bit
+            value={description}
+            onChange={setDescription}
+            numberOfLines={4}
           />
 
-          {/* Submit Button */}
-          <TouchableOpacity style={styles.submitButton}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Submit</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Loading Indicator with Translucent Background */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#6e44ff" />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -138,12 +234,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-//   headerText: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     textAlign: "center",
-//     marginBottom: 20,
-//   },
   reportSection: {
     backgroundColor: "#d3d3d3",
     borderRadius: 10,
@@ -161,7 +251,7 @@ const styles = StyleSheet.create({
   },
   imagePlaceholder: {
     width: "45%",
-    height: 150, // Increase size for larger image placeholders
+    height: 150,
     backgroundColor: "#ba9b9b",
     borderRadius: 10,
     justifyContent: "center",
@@ -211,11 +301,8 @@ const styles = StyleSheet.create({
   locationButton: {
     marginLeft: 10,
   },
-  locationIcon: {
-    fontSize: 18,
-  },
   reasonInput: {
-    height: 100, // Shrink Reason input
+    height: 100,
     textAlignVertical: "top",
     marginTop: 10,
   },
@@ -230,5 +317,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

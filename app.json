@@ -3,6 +3,7 @@
     "name": "BOVO",
     "platforms": ["ios", "android", "web"],
     "slug": "BOVO",
+    "assetBundlePatterns": ["**/*"],
     "version": "1.0.0",
     "plugins": ["@react-native-google-signin/google-signin"],
     "orientation": "portrait",

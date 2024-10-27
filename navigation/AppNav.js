@@ -1,4 +1,4 @@
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import React, { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import AuthStack from "./AuthStack";
@@ -9,13 +9,22 @@ const AppNav = () => {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size={"large"} />
+      <View style={styles.loadingOverlay}>
+        <ActivityIndicator size="large" color="#fff" />
       </View>
     );
   }
 
   return <>{userToken !== null ? <DrawerNavigation /> : <AuthStack />}</>;
 };
+
+const styles = StyleSheet.create({
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)", // Translucent background
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
 export default AppNav;
