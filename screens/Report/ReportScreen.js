@@ -89,7 +89,7 @@ export default function ReportScreen() {
         });
 
         const response = await axios.post(
-          `${BASE_URL}/extract/text`,
+          `${BASE_URL}/report/extract/text`,
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -106,15 +106,10 @@ export default function ReportScreen() {
     const report = {
       description: description,
       location: address,
+      plateNumber: plate,
     };
 
     const formData = await setFormData(report);
-
-    console.log(formData)
-
-    // const config = {
-    //   headers: { "Content-Type": "multipart/form-data" },
-    // };
 
     try {
       const response = await axios.post(
@@ -122,7 +117,7 @@ export default function ReportScreen() {
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      console.log("Response:", response.data);
+      
     } catch (error) {
       console.error("Error on reportScreen:", error);
     }
