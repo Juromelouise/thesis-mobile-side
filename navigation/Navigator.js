@@ -3,6 +3,8 @@ import React from "react";
 import HomeScreen from "../screens/HomeScreen";
 import ReportScreen from "../screens/Report/ReportScreen";
 import "react-native-gesture-handler";
+import ProfileScreen from "../screens/User/ProfileScreen";
+import ObstructionScreen from "../screens/Report/ObstructionScreen";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -16,6 +18,16 @@ const Navigator = () => {
       <Stack.Screen
         name="ReportScreen"
         component={ReportScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ObstructionScreen"
+        component={ObstructionScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

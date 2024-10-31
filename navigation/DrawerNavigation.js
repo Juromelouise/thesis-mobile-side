@@ -1,7 +1,8 @@
 import "react-native-gesture-handler";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
+import Icon from "react-native-vector-icons/FontAwesome";
 import { AuthContext } from "../context/AuthContext";
 import Navigator from "./Navigator";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
@@ -10,6 +11,7 @@ const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = ({ navigation }) => {
   const { logout } = useContext(AuthContext);
+  const [isReportDropdownOpen, setIsReportDropdownOpen] = useState(false);
 
   return (
     <View style={styles.drawerContainer}>
@@ -24,18 +26,60 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={styles.drawerButton}
       >
+        <Icon name="home" size={20} color="#333" style={styles.icon} />
         <Text style={styles.drawerButtonText}>Home</Text>
+      </TouchableOpacity>
+
+      {/* Profile */}
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Profile");
+        }}
+        style={styles.drawerButton}
+      >
+        <Icon name="user" size={20} color="#333" style={styles.icon} />
+        <Text style={styles.drawerButtonText}>Profile</Text>
       </TouchableOpacity>
 
       {/* Report */}
       <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Report");
-        }}
+        onPress={() => setIsReportDropdownOpen(!isReportDropdownOpen)}
         style={styles.drawerButton}
       >
+        <Icon name="file" size={20} color="#333" style={styles.icon} />
         <Text style={styles.drawerButtonText}>Report</Text>
+        <Icon
+          name={isReportDropdownOpen ? "angle-up" : "angle-down"}
+          size={16}
+          color="#333"
+          style={styles.dropdownIcon}
+        />
       </TouchableOpacity>
+
+      {/* Dropdown for Report options */}
+      {isReportDropdownOpen && (
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("ReportScreen");
+            }}
+            style={styles.dropdownButton}
+          >
+            <Icon name="ban" size={16} color="#333" style={styles.icon} />
+            <Text style={styles.dropdownButtonText}>Report Illegal Parking</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("ObstructionScreen");
+            }}
+            style={styles.dropdownButton}
+          >
+            <Icon name="road" size={16} color="#333" style={styles.icon} />
+            <Text style={styles.dropdownButtonText}>Report Obstruction</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Logout */}
       <TouchableOpacity
@@ -44,7 +88,10 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={[styles.drawerButton, styles.logoutButton]}
       >
-        <Text style={[styles.drawerButtonText, styles.logoutButtonText]}>Logout</Text>
+        <Icon name="sign-out" size={20} color="#fff" style={styles.icon} />
+        <Text style={[styles.drawerButtonText, styles.logoutButtonText]}>
+          Logout
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -63,9 +110,19 @@ const DrawerNavigation = () => {
           initialParams={{ screen: "HomeScreen" }}
         />
         <Drawer.Screen
-          name="Report"
+          name="Illegal Parking"
           component={Navigator}
           initialParams={{ screen: "ReportScreen" }}
+        />
+        <Drawer.Screen
+          name="Obstruction"
+          component={Navigator}
+          initialParams={{ screen: "ObstructionScreen" }}
+        />
+        <Drawer.Screen
+          name="Profile"
+          component={Navigator}
+          initialParams={{ screen: "ProfileScreen" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>
@@ -77,7 +134,7 @@ export default DrawerNavigation;
 const styles = StyleSheet.create({
   drawerContainer: {
     flex: 1,
-    paddingTop: 60, // Top padding to fix spacing at the top
+    paddingTop: 60,
     backgroundColor: "#f5f5f5",
     paddingHorizontal: 20,
   },
@@ -91,13 +148,15 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   drawerButton: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 15,
     paddingHorizontal: 10,
     backgroundColor: "#fff",
     marginBottom: 20,
     borderRadius: 8,
-    elevation: 2, 
-    shadowColor: "#000", 
+    elevation: 2,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -105,11 +164,36 @@ const styles = StyleSheet.create({
   drawerButtonText: {
     fontSize: 18,
     color: "#333",
+    marginLeft: 10,
   },
   logoutButton: {
     backgroundColor: "#ff6b6b",
   },
   logoutButtonText: {
     color: "#fff",
+  },
+  dropdownContainer: {
+    marginLeft: 40,
+    marginTop: -10,
+  },
+  dropdownButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#e0e0e0",
+    marginBottom: 10,
+    borderRadius: 6,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 10,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  dropdownIcon: {
+    marginLeft: "auto",
   },
 });

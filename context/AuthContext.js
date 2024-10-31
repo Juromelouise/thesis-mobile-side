@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }) => {
         "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
       offlineAccess: true,
     });
-  }, []);
+    axios.defaults.headers.common['Authorization'] = userToken;
+  }, [userToken]);
 
   const login = (email, password) => {
     setIsLoading(true);
@@ -36,7 +37,8 @@ export const AuthProvider = ({ children }) => {
         console.log(res.data);
         setUserToken(res.data.token);
         AsyncStorage.setItem("userToken", res.data.token);
-        AsyncStorage.setItem("user", response.data);
+        // AsyncStorage.setItem("user", response.data);
+        console.log;
       })
       .catch((e) => {
         console.log(`Login error ${e}`);
@@ -76,7 +78,6 @@ export const AuthProvider = ({ children }) => {
             return AsyncStorage.setItem("userToken", response.data.token).then(
               () => {
                 setUserToken(response.data.token);
-                AsyncStorage.setItem("user", response.data);
               }
             );
           })
@@ -102,6 +103,7 @@ export const AuthProvider = ({ children }) => {
 
       axios.get(`${BASE_URL}/user/logout`);
       AsyncStorage.removeItem("userToken");
+      AsyncStorage.removeItem("user");
       setUserToken(null);
       GoogleSignin.signOut();
       // GoogleSignin.revokeAccess();

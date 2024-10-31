@@ -19,10 +19,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={{ uri: "https://example.com/logo.png" }}
-        style={styles.logo}
-      />
+      <Image source={require("../assets/BOVO_logo.png")} style={styles.logo} />
       <Text style={styles.title}>Welcome Back!</Text>
       <TextInput
         style={styles.input}

@@ -1,7 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
+// import axios from "axios";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = () => {
+  // useEffect(() => {
+  //   AsyncStorage.getItem("userToken").then((token) => {
+  //     console.log(token)
+  //   });
+  // });
   return (
     <View>
       <Text>homebai</Text>
