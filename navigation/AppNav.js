@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import AuthStack from "./AuthStack";
 import DrawerNavigation from "./DrawerNavigation";
 
+
 const AppNav = () => {
   const { isLoading, userToken } = useContext(AuthContext);
 

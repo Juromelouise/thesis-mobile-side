@@ -11,19 +11,18 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { setFormData } from "../../utils/formData";
+import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { BASE_URL } from "../../config";
 import axios from "axios";
-import { setFormData } from "../../utils/formData";
-import { useNavigation } from "@react-navigation/native";
 
-export default function ReportScreen() {
+const ObstructionScreen = () => {
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
-  const [plate, setPlate] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
 
@@ -71,37 +70,6 @@ export default function ReportScreen() {
       console.error("Error fetching location:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const pickImageAndUpload = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [8, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const imageUri = result.assets[0].uri;
-      try {
-        const formData = new FormData();
-        formData.append("imageReport", {
-          uri: imageUri,
-          type: "image/jpg",
-          name: "plate_number.jpg",
-        });
-
-        const response = await axios.post(
-          `${BASE_URL}/report/extract/text`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        setPlate(response.data.extractedText);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
     }
   };
 
@@ -178,22 +146,6 @@ export default function ReportScreen() {
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="Plate Number"
-              placeholderTextColor="#aaa"
-              value={plate}
-              onChangeText={setPlate}
-            />
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={pickImageAndUpload}
-            >
-              <Ionicons name="camera" size={24} color="#000" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
               placeholder="Location"
               placeholderTextColor="#aaa"
               value={address}
@@ -230,7 +182,9 @@ export default function ReportScreen() {
       )}
     </SafeAreaView>
   );
-}
+};
+
+export default ObstructionScreen;
 
 const styles = StyleSheet.create({
   container: {
