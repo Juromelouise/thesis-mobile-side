@@ -5,6 +5,7 @@ import { BASE_URL } from "../config";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
 
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
       offlineAccess: true,
     });
-    axios.defaults.headers.common['Authorization'] = userToken;
+    axios.defaults.headers.common["Authorization"] = userToken;
   }, [userToken]);
 
   const login = (email, password) => {

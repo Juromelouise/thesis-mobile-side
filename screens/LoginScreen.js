@@ -7,15 +7,27 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, Snackbar } from "react-native-paper";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, googleLogin } = useContext(AuthContext); // Destructure login from the AuthContext
+  const [isSnackbarVisible, setSnackbarVisible] = useState(false);
+  const { login, googleLogin } = useContext(AuthContext);
   const navigation = useNavigation();
+
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+    } catch (e) {
+      console.error(`Login error: ${e}`);
+      setSnackbarVisible(true);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -42,20 +54,15 @@ export default function LoginScreen() {
       <TouchableOpacity style={styles.forgotPassword}>
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
-      <Button
-        mode="contained"
-        onPress={() => login(email, password)}
-        style={styles.loginButton}
-      >
+      <Button mode="contained" onPress={handleLogin} style={styles.loginButton}>
         Login
       </Button>
 
-      {/* Google Button */}
       <Button
         mode="outlined"
         style={styles.googleButton}
         icon="google"
-        onPress={() => googleLogin()}
+        onPress={googleLogin}
       >
         Continue with Google
       </Button>
@@ -71,6 +78,14 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <Snackbar
+        visible={isSnackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+      >
+        Wrong Email or Password
+      </Snackbar>
     </View>
   );
 }

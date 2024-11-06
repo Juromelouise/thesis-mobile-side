@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { BASE_URL } from "../../config";
 import axios from "axios";
-import { setFormData } from "../../utils/formData";
+import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 
 export default function ReportScreen() {
@@ -107,20 +107,22 @@ export default function ReportScreen() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const report = {
-      description: description,
-      location: address,
-      plateNumber: plate,
-    };
 
-    const formData = await setFormData(report);
+    const formData = new FormData();
+
+    let image = [];
+    image = await setImageUpload(images);
+    formData.append("description", description);
+    formData.append("location", address);
+    formData.append("plateNumber", plate);
+    image.map((imag) => {
+      formData.append("images", imag);
+    });
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/report/post/report`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${BASE_URL}/report/post/report`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setAddress("");
       setDescription("");
       setPlate("");
@@ -129,6 +131,7 @@ export default function ReportScreen() {
       navigation.navigate("HomeScreen");
     } catch (error) {
       console.error("Error on reportScreen:", error);
+      navigate.navigate("ReportScreen");
       setLoading(false);
     }
   };
