@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { setFormData } from "../../utils/formData";
+import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -75,23 +75,23 @@ const ObstructionScreen = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const report = {
-      description: description,
-      location: address,
-      plateNumber: plate,
-    };
 
-    const formData = await setFormData(report);
+    const formData = new FormData();
+
+    let image = [];
+    image = await setImageUpload(images);
+    formData.append("description", description);
+    formData.append("location", address);
+    image.map((imag) => {
+      formData.append("images", imag);
+    });
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/report/post/report`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${BASE_URL}/report/post/obstruction`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setAddress("");
       setDescription("");
-      setPlate("");
       setImages([]);
       setLoading(false);
       navigation.navigate("HomeScreen");
