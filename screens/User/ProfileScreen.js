@@ -21,7 +21,7 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         {user.avatar ? (
-          <Avatar.Image size={120} source={{ uri: user.avatar }} />
+          <Avatar.Image size={120} source={{ uri: user.avatar.url }} />
         ) : (
           <FontAwesome name="user-circle" size={120} />
         )}

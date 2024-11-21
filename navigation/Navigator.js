@@ -5,6 +5,8 @@ import ReportScreen from "../screens/Report/ReportScreen";
 import "react-native-gesture-handler";
 import ProfileScreen from "../screens/User/ProfileScreen";
 import ObstructionScreen from "../screens/Report/ObstructionScreen";
+import ReportListScreen from "../screens/Report/ReportListScreen";
+import DetailReportScreen from "../screens/Report/DetailReportScreen";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -28,6 +30,17 @@ const Navigator = () => {
       <Stack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="ReportListScreen"
+        component={ReportListScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="DetailReportScreen"
+        component={DetailReportScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

@@ -110,7 +110,7 @@ export default function ReportScreen() {
 
     const formData = new FormData();
 
-    let image = [];
+    let image = [];``
     image = await setImageUpload(images);
     formData.append("description", description);
     formData.append("location", address);
