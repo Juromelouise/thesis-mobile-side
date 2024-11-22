@@ -1,16 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   StyleSheet,
   Text,
   TouchableOpacity,
   TextInput,
-  Image,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Button, Avatar } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
+import { BASE_URL } from "../assets/common/config";
+import axios from "axios";
+import { setFormData } from "../utils/formData";
+import mime from "mime";
+import { AuthContext } from "../context/AuthContext";
 
 export default function RegisterScreen() {
   const [firstName, setFirstName] = useState("");
@@ -20,7 +25,9 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const { register } = useContext(AuthContext);
 
   const handleProfilePicture = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -31,13 +38,67 @@ export default function RegisterScreen() {
     });
 
     if (!result.canceled) {
-      setProfilePicture(result.uri);
+      setProfilePicture(result.assets[0].uri);
     }
   };
+  const imagehandler = async (image) => {
+    const newImageUri = "file:///" + image.split("file:/").join("");
+    return {
+      uri: newImageUri,
+      type: mime.getType(newImageUri),
+      name: newImageUri.split("/").pop(),
+    };
+  };
 
-  const handleSignUp = () => {
-    console.log("Sign Up Pressed");
-    // Add sign-up logic here
+  const handleSignUp = async () => {
+    // setLoading(true);
+    // try {
+    //   // Define other user data
+    //   const userData = {
+    //     firstName,
+    //     lastName,
+    //     phoneNumber,
+    //     address,
+    //     email,
+    //     password,
+    //   };
+
+    //   const formData = new FormData();
+    //   for (const key in userData) {
+    //     formData.append(key, userData[key]);
+    //   }
+
+    //   if (profilePicture) {
+    //     const fileUri = profilePicture;
+    //     const fileName = fileUri.split("/").pop();
+    //     const fileType = fileName.split(".").pop();
+
+    //     formData.append("avatar", {
+    //       uri: fileUri,
+    //       name: fileName,
+    //       type: `image/${fileType}`,
+    //     });
+    //   }
+    //   console.log(formData._parts[6]);
+
+    //   // Send the FormData to the backend
+    //   await axios.post(`${BASE_URL}/user/register`, formData, {
+    //     headers: { "Content-Type": "multipart/form-data" },
+    //   });
+    //   setLoading(false); // Stop loading
+    // } catch (error) {
+    //   console.error("Error during sign up:", error.message);
+    //   setLoading(false); // Stop loading on error
+    // }
+    register(
+      firstName,
+      lastName,
+      phoneNumber,
+      address,
+      email,
+      password,
+      profilePicture
+    );
   };
 
   return (
@@ -101,9 +162,13 @@ export default function RegisterScreen() {
         mode="contained"
         onPress={handleSignUp}
         style={styles.signUpButton}
+        disabled={loading} // Disable button while loading
       >
-        Sign Up
+        {loading ? "Signing Up..." : "Sign Up"}
       </Button>
+
+      {/* Loading Indicator */}
+      {loading && <ActivityIndicator size="large" color="#3498db" />}
 
       {/* Continue with Google Button */}
       <Button
@@ -118,7 +183,12 @@ export default function RegisterScreen() {
       <View style={styles.signInContainer}>
         <Text style={styles.signInText}>Already have an account?</Text>
         <TouchableOpacity>
-          <Text style={styles.signInLink} onPress={() => navigation.navigate("Login")}>Sign In</Text>
+          <Text
+            style={styles.signInLink}
+            onPress={() => navigation.navigate("Login")}
+          >
+            Sign In
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

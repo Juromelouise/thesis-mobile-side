@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Avatar, Title, Text, Button, Divider, List } from "react-native-paper";
 import { FontAwesome } from "@expo/vector-icons"; // Corrected import
 import axios from "axios";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../assets/common/config";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState({});
@@ -21,7 +21,7 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         {user.avatar ? (
-          <Avatar.Image size={120} source={{ uri: user.avatar }} />
+          <Avatar.Image size={120} source={{ uri: user.avatar.url }} />
         ) : (
           <FontAwesome name="user-circle" size={120} />
         )}

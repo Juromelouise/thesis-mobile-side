@@ -1,10 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
-import { BASE_URL } from "../config";
+import { BASE_URL } from "../assets/common/config";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
-
 
 export const AuthContext = createContext();
 
@@ -19,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
+    console.log(BASE_URL)
     GoogleSignin.configure({
       webClientId:
         "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
@@ -35,11 +35,8 @@ export const AuthProvider = ({ children }) => {
         password,
       })
       .then((res) => {
-        console.log(res.data);
         setUserToken(res.data.token);
         AsyncStorage.setItem("userToken", res.data.token);
-        // AsyncStorage.setItem("user", response.data);
-        console.log;
       })
       .catch((e) => {
         console.log(`Login error ${e}`);
@@ -47,6 +44,54 @@ export const AuthProvider = ({ children }) => {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  const register = async (
+    firstName,
+    lastName,
+    phoneNumber,
+    address,
+    email,
+    password,
+    profilePicture
+  ) => {
+    setIsLoading(true);
+    try {
+      const userData = {
+        firstName,
+        lastName,
+        phoneNumber,
+        address,
+        email,
+        password,
+      };
+
+      const formData = new FormData();
+      for (const key in userData) {
+        formData.append(key, userData[key]);
+      }
+
+      if (profilePicture) {
+        const fileUri = profilePicture;
+        const fileName = fileUri.split("/").pop();
+        const fileType = fileName.split(".").pop();
+
+        formData.append("avatar", {
+          uri: fileUri,
+          name: fileName,
+          type: `image/${fileType}`,
+        });
+      }
+
+      const res = await axios.post(`${BASE_URL}/user/register`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      await AsyncStorage.setItem("userToken", res.data.token)
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error during sign up:", error.message);
+      setIsLoading(false);
+    }
   };
 
   const googleLogin = () => {
@@ -133,7 +178,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ login, logout, googleLogin, isLoading, userToken }}
+      value={{ login, logout, googleLogin, isLoading, userToken, register }}
     >
       {children}
     </AuthContext.Provider>

@@ -41,6 +41,16 @@ const CustomDrawerContent = ({ navigation }) => {
         <Text style={styles.drawerButtonText}>Profile</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("List");
+        }}
+        style={styles.drawerButton}
+      >
+        <Icon name="th-list" size={20} color="#333" style={styles.icon} />
+        <Text style={styles.drawerButtonText}>List of Report</Text>
+      </TouchableOpacity>
+
       {/* Report */}
       <TouchableOpacity
         onPress={() => setIsReportDropdownOpen(!isReportDropdownOpen)}
@@ -61,17 +71,19 @@ const CustomDrawerContent = ({ navigation }) => {
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("ReportScreen");
+              navigation.navigate("Illegal Parking");
             }}
             style={styles.dropdownButton}
           >
             <Icon name="ban" size={16} color="#333" style={styles.icon} />
-            <Text style={styles.dropdownButtonText}>Report Illegal Parking</Text>
+            <Text style={styles.dropdownButtonText}>
+              Report Illegal Parking
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("ObstructionScreen");
+              navigation.navigate("Obstruction");
             }}
             style={styles.dropdownButton}
           >
@@ -108,21 +120,31 @@ const DrawerNavigation = () => {
           name="Home"
           component={Navigator}
           initialParams={{ screen: "HomeScreen" }}
+          options={{ title: "Home" }}
         />
         <Drawer.Screen
           name="Illegal Parking"
           component={Navigator}
           initialParams={{ screen: "ReportScreen" }}
+          options={{ title: "Report Illegal Parking" }}
         />
         <Drawer.Screen
           name="Obstruction"
           component={Navigator}
           initialParams={{ screen: "ObstructionScreen" }}
+          options={{ title: "Rerport Obstruction" }}
         />
         <Drawer.Screen
           name="Profile"
           component={Navigator}
           initialParams={{ screen: "ProfileScreen" }}
+          options={{ title: "Profile" }}
+        />
+        <Drawer.Screen
+          name="List"
+          component={Navigator}
+          initialParams={{ screen: "ReportListScreen" }}
+          options={{ title: "List of Report" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>
