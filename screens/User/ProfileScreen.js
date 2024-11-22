@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Avatar, Title, Text, Button, Divider, List } from "react-native-paper";
 import { FontAwesome } from "@expo/vector-icons"; // Corrected import
 import axios from "axios";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../assets/common/config";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState({});

@@ -11,7 +11,7 @@ import {
 import { Button, Avatar } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import { BASE_URL } from "../config";
+import { BASE_URL } from "../assets/common/config";
 import axios from "axios";
 import { setFormData } from "../utils/formData";
 import mime from "mime";
@@ -90,7 +90,15 @@ export default function RegisterScreen() {
     //   console.error("Error during sign up:", error.message);
     //   setLoading(false); // Stop loading on error
     // }
-    register(firstName, lastName, phoneNumber, address, email, password, profilePicture);
+    register(
+      firstName,
+      lastName,
+      phoneNumber,
+      address,
+      email,
+      password,
+      profilePicture
+    );
   };
 
   return (

@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../assets/common/config";
 
 const ReportListScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ const ReportListScreen = () => {
   // useEffect(() => {
   //   getData();
   // }, []);
-  
+
   useFocusEffect(
     React.useCallback(() => {
       getData();
@@ -35,7 +35,11 @@ const ReportListScreen = () => {
   );
 
   const handlePress = (report) => {
-    navigation.navigate("DetailReportScreen", { report });
+    if (report.plateNumber) {
+      navigation.navigate("DetailReportScreen", { report });
+    } else {
+      navigation.navigate("DetailObstructionScreen", { report });
+    }
   };
 
   const renderItem = ({ item }) => (

@@ -21,12 +21,11 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 
-const DetailReportScreen = ({ route }) => {
+const DetailObstructionScreen = ({ route }) => {
   const [data, setData] = useState({});
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
-  const [plate, setPlate] = useState("");
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const navigate = useNavigation();
@@ -87,37 +86,6 @@ const DetailReportScreen = ({ route }) => {
     }
   };
 
-  const pickImageAndUpload = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [8, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const imageUri = result.assets[0].uri;
-      try {
-        const formData = new FormData();
-        formData.append("imageReport", {
-          uri: imageUri,
-          type: "image/jpg",
-          name: "plate_number.jpg",
-        });
-
-        const response = await axios.post(
-          `${BASE_URL}/report/extract/text`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        setPlate(response.data.extractedText);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    }
-  };
-
   const deleteReport = async (id) => {
     Alert.alert(
       "Confirm Delete",
@@ -133,7 +101,7 @@ const DetailReportScreen = ({ route }) => {
           onPress: async () => {
             try {
               const { data } = await axios.delete(
-                `${BASE_URL}/report/delete/report/${id}`,
+                `${BASE_URL}/report/delete/obstruction/${id}`,
                 {
                   headers: {
                     "Content-Type": "application/json",
@@ -169,24 +137,23 @@ const DetailReportScreen = ({ route }) => {
     console.log(image);
     formData.append("description", description);
     formData.append("location", address);
-    formData.append("plateNumber", plate);
     image.map((imag) => {
       formData.append("images", imag);
     });
 
     try {
       const { data } = await axios.put(
-        `${BASE_URL}/report/update/report/${id}`,
+        `${BASE_URL}/report/update/obstruction/${id}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      setData(data.report);
+
       setAddress("");
       setDescription("");
-      setPlate("");
       setImages([]);
+      setData(data.obstruction);
       alert("Updated Successfully");
       setLoading(false);
     } catch (error) {
@@ -204,7 +171,7 @@ const DetailReportScreen = ({ route }) => {
     }, [route.params.report])
   );
 
-  console.log(data);
+  // console.log(data.images);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -224,17 +191,10 @@ const DetailReportScreen = ({ route }) => {
           </View>
 
           <View style={styles.inputRow}>
-            <Text style={styles.label}>Plate Number:</Text>
-            <Text style={styles.input}>
-              {data?.plateNumber?.plateNumber || "N/A"}
-            </Text>
-          </View>
-
-          <View style={styles.inputRow}>
             <Text style={styles.label}>Violation:</Text>
             <Text style={styles.input}>
-              {data?.plateNumber?.violations?.length > 0
-                ? data?.plateNumber?.violations.join(", ")
+              {data?.violations?.length > 0
+                ? data?.violations.join(", ")
                 : "No violations reported"}
             </Text>
           </View>
@@ -307,23 +267,6 @@ const DetailReportScreen = ({ route }) => {
                   <Text style={styles.addImageButtonText}>Add Image</Text>
                 </TouchableOpacity>
 
-                {/* Plate Number Input */}
-                <View style={styles.inputRowWithIcon}>
-                  <TextInput
-                    style={[styles.input, styles.inputWithIcon]}
-                    placeholder="Plate Number"
-                    placeholderTextColor="#aaa"
-                    value={plate}
-                    onChangeText={setPlate}
-                  />
-                  <TouchableOpacity
-                    style={styles.iconButton}
-                    onPress={pickImageAndUpload}
-                  >
-                    <Ionicons name="camera" size={24} color="#000" />
-                  </TouchableOpacity>
-                </View>
-
                 {/* Location Input */}
                 <View style={styles.inputRowWithIcon}>
                   <TextInput
@@ -375,7 +318,7 @@ const DetailReportScreen = ({ route }) => {
   );
 };
 
-export default DetailReportScreen;
+export default DetailObstructionScreen;
 
 const styles = StyleSheet.create({
   container: {

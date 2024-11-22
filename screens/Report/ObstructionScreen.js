@@ -15,7 +15,7 @@ import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../assets/common/config";
 import axios from "axios";
 
 const ObstructionScreen = () => {
@@ -94,7 +94,7 @@ const ObstructionScreen = () => {
       setDescription("");
       setImages([]);
       setLoading(false);
-      navigation.navigate("HomeScreen");
+      navigation.navigate("Home");
     } catch (error) {
       console.error("Error on reportScreen:", error);
       setLoading(false);

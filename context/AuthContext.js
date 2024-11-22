@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
-import { BASE_URL } from "../config";
+import { BASE_URL } from "../assets/common/config";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
 
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
+    console.log(BASE_URL)
     GoogleSignin.configure({
       webClientId:
         "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
