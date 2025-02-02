@@ -27,6 +27,7 @@ const DetailReportScreen = ({ route }) => {
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [plate, setPlate] = useState("");
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const navigate = useNavigation();
@@ -158,6 +159,7 @@ const DetailReportScreen = ({ route }) => {
       { cancelable: true }
     );
   };
+
   const handleSubmit = async (id) => {
     setLoading(true);
     setVisible(false);
@@ -198,13 +200,15 @@ const DetailReportScreen = ({ route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      setData(route.params.report || {});
+      const reportData = route.params.report || {};
+      setData(reportData);
+      setStatus(reportData.status || "N/A");
       // setImages([]);
-      console.log(route.params.report);
+      console.log(reportData);
     }, [route.params.report])
   );
 
-  console.log(data);
+  // console.log(data);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -250,23 +254,36 @@ const DetailReportScreen = ({ route }) => {
               {data?.description || "No description provided."}
             </Text>
           </View>
-          <Button
-            style={{ marginTop: 30 }}
-            onPress={showModal}
-            mode="contained"
-          >
-            Edit Report
-          </Button>
-          <Button
-            style={{ marginTop: 30, backgroundColor: "red", color: "white" }}
-            textColor="white"
-            mode="contained"
-            onPress={() => {
-              deleteReport(data._id);
-            }}
-          >
-            Delete Report
-          </Button>
+
+          <View style={styles.inputRow}>
+            <Text style={styles.label}>Status:</Text>
+            <Text style={styles.input}>{status}</Text>
+          </View>
+          {data && data.status === "Pending" && (
+            <>
+              <Button
+                style={{ marginTop: 30 }}
+                onPress={showModal}
+                mode="contained"
+              >
+                Edit Report
+              </Button>
+              <Button
+                style={{
+                  marginTop: 30,
+                  backgroundColor: "red",
+                  color: "white",
+                }}
+                textColor="white"
+                mode="contained"
+                onPress={() => {
+                  deleteReport(data._id);
+                }}
+              >
+                Delete Report
+              </Button>
+            </>
+          )}
         </View>
 
         {/* Modal */}

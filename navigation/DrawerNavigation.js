@@ -1,17 +1,37 @@
 import "react-native-gesture-handler";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../context/AuthContext";
 import Navigator from "./Navigator";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import axios from "axios";
+import { useFocusEffect } from "@react-navigation/native";
+import { BASE_URL } from "../assets/common/config";
 
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = ({ navigation }) => {
   const { logout } = useContext(AuthContext);
   const [isReportDropdownOpen, setIsReportDropdownOpen] = useState(false);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      axios
+        .get(`${BASE_URL}/user/profile`)
+        .then((response) => {
+          setUser(response.data.user);
+          // console.log(response.data.user);
+        })
+        .catch((error) => {
+          console.error("Error fetching profile data: ", error);
+        });
+    }, [])
+  );
 
   return (
     <View style={styles.drawerContainer}>
@@ -93,6 +113,45 @@ const CustomDrawerContent = ({ navigation }) => {
         </View>
       )}
 
+      {/* Admin */}
+      {user && user.role === "admin" && (
+        <>
+          <TouchableOpacity
+            onPress={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}
+            style={styles.drawerButton}
+          >
+            <MaterialIcons
+              name="admin-panel-settings"
+              size={20}
+              color="#333"
+              style={styles.icon}
+            />
+            <Text style={styles.drawerButtonText}>Admin</Text>
+            <Icon
+              name={isAdminDropdownOpen ? "angle-up" : "angle-down"}
+              size={16}
+              color="#333"
+              style={styles.dropdownIcon}
+            />
+          </TouchableOpacity>
+        </>
+      )}
+
+      {/* Dropdown for Admin options */}
+      {isAdminDropdownOpen && (
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Approve Reports");
+            }}
+            style={styles.dropdownButton}
+          >
+            <Icon name="check" size={16} color="#333" style={styles.icon} />
+            <Text style={styles.dropdownButtonText}>All Approve Reports</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Logout */}
       <TouchableOpacity
         onPress={() => {
@@ -132,7 +191,7 @@ const DrawerNavigation = () => {
           name="Obstruction"
           component={Navigator}
           initialParams={{ screen: "ObstructionScreen" }}
-          options={{ title: "Rerport Obstruction" }}
+          options={{ title: "Report Obstruction" }}
         />
         <Drawer.Screen
           name="Profile"
@@ -145,6 +204,14 @@ const DrawerNavigation = () => {
           component={Navigator}
           initialParams={{ screen: "ReportListScreen" }}
           options={{ title: "List of Report" }}
+        />
+
+        {/* ADMIN */}
+        <Drawer.Screen
+          name="Approve Reports"
+          component={Navigator}
+          initialParams={{ screen: "ApproveReports" }}
+          options={{ title: "All Approve Reports" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>

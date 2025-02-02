@@ -8,6 +8,7 @@ import ObstructionScreen from "../screens/Report/ObstructionScreen";
 import ReportListScreen from "../screens/Report/ReportListScreen";
 import DetailReportScreen from "../screens/Report/DetailReportScreen";
 import DetailObstructionScreen from "../screens/Report/DetailObstructionScreen";
+import ApproveReports from "../screens/Admin/ApproveReports";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -47,6 +48,11 @@ const Navigator = () => {
        <Stack.Screen
         name="DetailObstructionScreen"
         component={DetailObstructionScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ApproveReports"
+        component={ApproveReports}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
