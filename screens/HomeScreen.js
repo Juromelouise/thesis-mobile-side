@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -71,8 +72,9 @@ const ReportCard = ({ createdAt, location, images, description }) => {
 };
 
 const HomeScreen = () => {
-  const navigate = useNavigation();
+  const navigation = useNavigation();
   const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const getData = async () => {
     try {
@@ -86,9 +88,14 @@ const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       getData();
-      return () => {}; 
+      return () => {};
     }, [])
   );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    getData().then(() => setRefreshing(false));
+  }, []);
 
   return (
     <FlatList
@@ -103,6 +110,9 @@ const HomeScreen = () => {
         />
       )}
       contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     />
   );
 };
