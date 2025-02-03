@@ -30,6 +30,7 @@ const DetailReportScreen = ({ route }) => {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
+  const [confirmationImages, setConfirmationImages] = useState([]);
   const navigate = useNavigation();
 
   const showModal = () => setVisible(true);
@@ -203,6 +204,7 @@ const DetailReportScreen = ({ route }) => {
       const reportData = route.params.report || {};
       setData(reportData);
       setStatus(reportData.status || "N/A");
+      setConfirmationImages(reportData.confirmationImages || []);
       // setImages([]);
       console.log(reportData);
     }, [route.params.report])
@@ -226,6 +228,22 @@ const DetailReportScreen = ({ route }) => {
               />
             ))}
           </View>
+          
+          <View style={styles.inputRow}>
+            <Text style={styles.label}>Confirmation Images:</Text>
+          </View>
+          {status === "Resolved" && confirmationImages.length > 0 && (
+            <View style={styles.imagesContainer}>
+              {confirmationImages.map((img, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: img.url }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          )}
 
           <View style={styles.inputRow}>
             <Text style={styles.label}>Plate Number:</Text>

@@ -211,7 +211,7 @@ const DrawerNavigation = () => {
           name="Approve Reports"
           component={Navigator}
           initialParams={{ screen: "ApproveReports" }}
-          options={{ title: "All Approve Reports" }}
+          options={{ title: "Approve Reports" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>

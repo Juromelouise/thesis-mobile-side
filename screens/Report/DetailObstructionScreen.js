@@ -28,6 +28,7 @@ const DetailObstructionScreen = ({ route }) => {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
+  const [confirmationImages, setConfirmationImages] = useState([]);
   const navigate = useNavigation();
 
   const showModal = () => setVisible(true);
@@ -165,7 +166,9 @@ const DetailObstructionScreen = ({ route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      setData(route.params.report || {});
+      const reportData = route.params.report || {};
+      setData(reportData);
+      setConfirmationImages(reportData.confirmationImages || []);
       // setImages([]);
       console.log(route.params.report);
     }, [route.params.report])
@@ -191,6 +194,22 @@ const DetailObstructionScreen = ({ route }) => {
           </View>
 
           <View style={styles.inputRow}>
+            <Text style={styles.label}>Confirmation Images:</Text>
+          </View>
+          {data.status === "Resolved" && confirmationImages.length > 0 && (
+            <View style={styles.imagesContainer}>
+              {confirmationImages.map((img, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: img.url }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          )}
+
+          <View style={styles.inputRow}>
             <Text style={styles.label}>Violation:</Text>
             <Text style={styles.input}>
               {data?.violations?.length > 0
@@ -210,23 +229,35 @@ const DetailObstructionScreen = ({ route }) => {
               {data?.description || "No description provided."}
             </Text>
           </View>
-          <Button
-            style={{ marginTop: 30 }}
-            onPress={showModal}
-            mode="contained"
-          >
-            Edit Report
-          </Button>
-          <Button
-            style={{ marginTop: 30, backgroundColor: "red", color: "white" }}
-            textColor="white"
-            mode="contained"
-            onPress={() => {
-              deleteReport(data._id);
-            }}
-          >
-            Delete Report
-          </Button>
+          <View style={styles.inputRow}>
+            <Text style={styles.label}>Status:</Text>
+            <Text style={styles.input}>{data.status}</Text>
+          </View>
+          {data && data.status === "Pending" && (
+            <>
+              <Button
+                style={{ marginTop: 30 }}
+                onPress={showModal}
+                mode="contained"
+              >
+                Edit Report
+              </Button>
+              <Button
+                style={{
+                  marginTop: 30,
+                  backgroundColor: "red",
+                  color: "white",
+                }}
+                textColor="white"
+                mode="contained"
+                onPress={() => {
+                  deleteReport(data._id);
+                }}
+              >
+                Delete Report
+              </Button>
+            </>
+          )}
         </View>
 
         {/* Modal */}
