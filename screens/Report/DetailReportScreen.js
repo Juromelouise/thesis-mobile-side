@@ -204,6 +204,9 @@ const DetailReportScreen = ({ route }) => {
       const reportData = route.params.report || {};
       setData(reportData);
       setStatus(reportData.status || "N/A");
+      setDescription(reportData.original || "");
+      setAddress(reportData.location || "");
+      setPlate(reportData.plateNumber?.plateNumber || "");
       setConfirmationImages(reportData.confirmationImages || []);
       // setImages([]);
       console.log(reportData);
@@ -269,7 +272,7 @@ const DetailReportScreen = ({ route }) => {
           <View style={styles.inputRow}>
             <Text style={styles.label}>Description of the Report:</Text>
             <Text style={[styles.input, styles.reasonInput]}>
-              {data?.description || "No description provided."}
+              {data?.original || "No description provided."}
             </Text>
           </View>
 

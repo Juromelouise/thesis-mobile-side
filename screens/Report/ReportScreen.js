@@ -130,9 +130,10 @@ export default function ReportScreen() {
       setLoading(false);
       navigation.navigate("Home");
     } catch (error) {
+      setLoading(false);
       console.error("Error on reportScreen:", error);
       navigate.navigate("ReportScreen");
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
