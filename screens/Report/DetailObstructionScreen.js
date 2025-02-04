@@ -158,9 +158,9 @@ const DetailObstructionScreen = ({ route }) => {
       alert("Updated Successfully");
       setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Error on reportScreen:", error);
       navigate.navigate("Home");
-      setLoading(false);
     }
   };
 
@@ -168,6 +168,8 @@ const DetailObstructionScreen = ({ route }) => {
     useCallback(() => {
       const reportData = route.params.report || {};
       setData(reportData);
+      setDescription(reportData.original || "");
+      setAddress(reportData.location || "");
       setConfirmationImages(reportData.confirmationImages || []);
       // setImages([]);
       console.log(route.params.report);
@@ -226,7 +228,7 @@ const DetailObstructionScreen = ({ route }) => {
           <View style={styles.inputRow}>
             <Text style={styles.label}>Description of the Report:</Text>
             <Text style={[styles.input, styles.reasonInput]}>
-              {data?.description || "No description provided."}
+              {data?.original || "No description provided."}
             </Text>
           </View>
           <View style={styles.inputRow}>

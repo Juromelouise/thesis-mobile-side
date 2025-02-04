@@ -57,7 +57,7 @@ const ApproveReports = () => {
             <Card style={styles.card}>
               <Card.Content>
                 <Title style={styles.reportTitle}>{report.location}</Title>
-                <Paragraph style={styles.reportDescription}>{report.description}</Paragraph>
+                <Paragraph style={styles.reportDescription}>{report.original}</Paragraph>
               </Card.Content>
             </Card>
           </Animated.View>

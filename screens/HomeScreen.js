@@ -106,7 +106,7 @@ const HomeScreen = () => {
           createdAt={item.createdAt}
           location={item.location}
           images={item.images}
-          description={item.description}
+          description={item.original}
         />
       )}
       contentContainerStyle={styles.container}

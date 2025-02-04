@@ -128,7 +128,7 @@ const ViewApprovedReport = ({ route }) => {
           </>
         )}
         <Text style={styles.reportDescription}>
-          Description: {report.description}
+          Description: {report.original}
         </Text>
         {report && report.plateNumber ? (
           <>
