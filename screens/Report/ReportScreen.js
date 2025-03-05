@@ -9,14 +9,17 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import { BASE_URL } from "../../assets/common/config";
+import { API_URL, BASE_URL } from "../../assets/common/config";
 import axios from "axios";
 import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
+import { validateReportForm } from "../../utils/formValidation";
+import PictureModal from "../../utils/pictureModal";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
@@ -24,23 +27,22 @@ export default function ReportScreen() {
   const [address, setAddress] = useState("");
   const [plate, setPlate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [descriptionError, setDescriptionError] = useState("");
+  const [addressError, setAddressError] = useState("");
+  const [plateError, setPlateError] = useState("");
+  const [imagesError, setImagesError] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const navigation = useNavigation();
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  const showModal = (message) => {
+    setModalMessage(message);
+    setModalVisible(true);
+  };
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setImages((prevImages) => {
-        const updatedImages = [...prevImages, result.assets[0].uri].slice(0, 4);
-        console.log("Updated images:", updatedImages);
-        return updatedImages;
-      });
-    }
+  const pickImage = async (message) => {
+    showModal(message);
   };
 
   const getLocation = async () => {
@@ -77,7 +79,7 @@ export default function ReportScreen() {
   const pickImageAndUpload = async () => {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      aspect: [8, 3],
+      aspect: [8, 4],
       quality: 1,
     });
 
@@ -85,27 +87,36 @@ export default function ReportScreen() {
       const imageUri = result.assets[0].uri;
       try {
         const formData = new FormData();
-        formData.append("imageReport", {
+        formData.append("file", {
           uri: imageUri,
           type: "image/jpg",
           name: "plate_number.jpg",
         });
+        setLoading(true);
 
-        const response = await axios.post(
-          `${BASE_URL}/report/extract/text`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        setPlate(response.data.extractedText);
+        const response = await axios.post(`${API_URL}/alpr`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        setPlate(response.data.results[0].detected_plate);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.error("Error uploading image:", error);
       }
     }
   };
 
   const handleSubmit = async () => {
+    const { valid, errors } = validateReportForm(description, address, plate, images);
+    setDescriptionError(errors.descriptionError);
+    setAddressError(errors.addressError);
+    setPlateError(errors.plateError);
+    setImagesError(errors.imagesError);
+
+    if (!valid) {
+      return;
+    }
+
     setLoading(true);
 
     const formData = new FormData();
@@ -133,7 +144,6 @@ export default function ReportScreen() {
       setLoading(false);
       console.error("Error on reportScreen:", error);
       navigate.navigate("ReportScreen");
-      // setLoading(false);
     }
   };
 
@@ -146,7 +156,7 @@ export default function ReportScreen() {
           <View style={styles.imagesContainer}>
             <TouchableOpacity
               style={styles.imagePlaceholder}
-              onPress={pickImage}
+              onPress={() => pickImage("The first picture should be wide.")}
             >
               {images[0] ? (
                 <Image source={{ uri: images[0] }} style={styles.image} />
@@ -160,7 +170,7 @@ export default function ReportScreen() {
                 styles.imagePlaceholder,
                 images.length > 2 && styles.overlayContainer,
               ]}
-              onPress={pickImage}
+              onPress={() => pickImage("The second picture should be normal but should show the plate number of the vehicle.")}
             >
               {images[1] ? (
                 <>
@@ -178,6 +188,7 @@ export default function ReportScreen() {
               )}
             </TouchableOpacity>
           </View>
+          {imagesError && <Text style={styles.errorText}>{imagesError}</Text>}
 
           <View style={styles.inputRow}>
             <TextInput
@@ -194,6 +205,7 @@ export default function ReportScreen() {
               <Ionicons name="camera" size={24} color="#000" />
             </TouchableOpacity>
           </View>
+          {plateError && <Text style={styles.errorText}>{plateError}</Text>}
 
           <View style={styles.inputRow}>
             <TextInput
@@ -210,6 +222,7 @@ export default function ReportScreen() {
               <MaterialIcons name="my-location" size={20} color="#000" />
             </TouchableOpacity>
           </View>
+          {addressError && <Text style={styles.errorText}>{addressError}</Text>}
 
           <TextInput
             style={[styles.input, styles.reasonInput]}
@@ -220,6 +233,7 @@ export default function ReportScreen() {
             onChangeText={setDescription}
             numberOfLines={4}
           />
+          {descriptionError && <Text style={styles.errorText}>{descriptionError}</Text>}
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Submit</Text>
@@ -232,6 +246,12 @@ export default function ReportScreen() {
           <ActivityIndicator size="large" color="#6e44ff" />
         </View>
       )}
+
+      <PictureModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        message={modalMessage}
+      />
     </SafeAreaView>
   );
 }
@@ -335,5 +355,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    marginTop: 5,
+    marginBottom: 10,
   },
 });
