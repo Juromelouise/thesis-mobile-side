@@ -9,33 +9,40 @@ import React, { useEffect, useState } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
+import { Picker } from "@react-native-picker/picker";
 
 const ReportListScreen = () => {
   const navigation = useNavigation();
   const [reportData, setReportData] = useState([]);
+  const [filter, setFilter] = useState("all");
 
   const getData = async () => {
     try {
       const { data } = await axios.get(`${BASE_URL}/report/fetch/all`);
-      setReportData(data.data);
+      if (filter === "illegal_parking") {
+        setReportData(data.data.filter(item => item.plateNumber === true));
+      } else if (filter === "obstruction") {
+        setReportData(data.data.filter(item => item.plateNumber === false));
+      } else {
+        setReportData(data.data);
+      }
     } catch (e) {
       console.log(e);
       navigation.navigate("Home");
     }
   };
 
-  // useEffect(() => {
-  //   getData();
-  // }, []);
+  console.log(reportData);
 
   useFocusEffect(
     React.useCallback(() => {
       getData();
-    })
+    }, [filter])
   );
 
-  const handlePress = (report) => {
-    if (report.plateNumber) {
+  const handlePress = (report, plateNumber) => {
+    console.log(plateNumber);
+    if (plateNumber === true) {
       navigation.navigate("DetailReportScreen", { report });
     } else {
       navigation.navigate("DetailObstructionScreen", { report });
@@ -44,7 +51,7 @@ const ReportListScreen = () => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => handlePress(item)}
+      onPress={() => handlePress(item._id, item.plateNumber)}
       style={styles.reportBox}
     >
       <Text style={styles.date}>{item.createdAt.split("T")[0]}</Text>
@@ -60,6 +67,15 @@ const ReportListScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Report List</Text>
+      <Picker
+        selectedValue={filter}
+        style={styles.picker}
+        onValueChange={(itemValue) => setFilter(itemValue)}
+      >
+        <Picker.Item label="All" value="all" />
+        <Picker.Item label="Illegal Parking" value="illegal_parking" />
+        <Picker.Item label="Obstruction" value="obstruction" />
+      </Picker>
       <FlatList
         data={reportData}
         renderItem={renderItem}
@@ -83,6 +99,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     color: "#333",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+    marginBottom: 20,
   },
   listContent: {
     paddingBottom: 20,

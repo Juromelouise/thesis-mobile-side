@@ -23,7 +23,7 @@ export const validateReportForm = (description, address, plate, images) => {
   }
 
   if (images.length !== 3) {
-    errors.imagesError = "Exactly four images are required";
+    errors.imagesError = "Exactly three images are required";
     valid = false;
   }
 
@@ -48,6 +48,44 @@ export const validateObsForm = (description, address, images) => {
   }
   if (images.length !== 2) {
     errors.imagesError = "Exactly two images are required";
+    valid = false;
+  }
+
+  return { valid, errors };
+};
+
+export const validateEditProfileForm = (firstName, lastName, phoneNumber, address, avatar) => {
+  let valid = true;
+  let errors = {
+    firstNameError: "",
+    lastNameError: "",
+    phoneNumberError: "",
+    addressError: "",
+    avatarError: "",
+  };
+
+  if (!firstName) {
+    errors.firstNameError = "First name is required";
+    valid = false;
+  }
+
+  if (!lastName) {
+    errors.lastNameError = "Last name is required";
+    valid = false;
+  }
+
+  if (phoneNumber.length!== 11) {
+    errors.phoneNumberError = "Phone number is needed to be 11 digits";
+    valid = false;
+  }
+
+  if (!address) {
+    errors.addressError = "Address is required";
+    valid = false;
+  }
+
+  if (!avatar) {
+    errors.avatarError = "Avatar is required";
     valid = false;
   }
 

@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
+import { validateEditProfileForm } from "../../utils/formValidation";
 
 const EditProfileScreen = ({ route }) => {
   const { user } = route.params;
@@ -26,6 +27,8 @@ const EditProfileScreen = ({ route }) => {
   const [avatar1, setAvatar] = useState(user.avatar.url || null);
   const [avatar2, setAvatar2] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -42,7 +45,20 @@ const EditProfileScreen = ({ route }) => {
   };
 
   const handleSubmit = async () => {
+    const { valid, errors } = validateEditProfileForm(
+      firstName,
+      lastName,
+      phoneNumber,
+      address,
+      avatar1
+    );
+    if (!valid) {
+      setErrors(errors);
+      return;
+    }
+
     setLoading(true);
+    setIsDisabled(true);
     const formData = new FormData();
     formData.append("firstName", firstName);
     formData.append("lastName", lastName);
@@ -67,9 +83,13 @@ const EditProfileScreen = ({ route }) => {
         },
       ]);
     } catch (error) {
+      setLoading(false);
+      setIsDisabled(false);
       Alert.alert("Error", "Failed to update profile");
+      console.log(error);
     } finally {
       setLoading(false);
+      setIsDisabled(false);
     }
   };
 
@@ -88,26 +108,42 @@ const EditProfileScreen = ({ route }) => {
         placeholder="First Name"
         value={firstName}
         onChangeText={setFirstName}
+        editable={!isDisabled}
       />
+      {errors.firstNameError ? (
+        <Text style={styles.errorText}>{errors.firstNameError}</Text>
+      ) : null}
       <TextInput
         style={styles.input}
         placeholder="Last Name"
         value={lastName}
         onChangeText={setLastName}
+        editable={!isDisabled}
       />
+      {errors.lastNameError ? (
+        <Text style={styles.errorText}>{errors.lastNameError}</Text>
+      ) : null}
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
+        editable={!isDisabled}
       />
+      {errors.phoneNumberError ? (
+        <Text style={styles.errorText}>{errors.phoneNumberError}</Text>
+      ) : null}
       <TextInput
         style={styles.input}
         placeholder="Address"
         value={address}
         onChangeText={setAddress}
+        editable={!isDisabled}
       />
+      {errors.addressError ? (
+        <Text style={styles.errorText}>{errors.addressError}</Text>
+      ) : null}
       {loading ? (
         <ActivityIndicator size="large" color="#007BFF" style={styles.loader} />
       ) : (
@@ -173,5 +209,9 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 20,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
   },
 });

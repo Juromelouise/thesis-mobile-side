@@ -38,6 +38,28 @@ const DetailReportScreen = ({ route }) => {
   const hideModal = () => setVisible(false);
   const containerStyle = { backgroundColor: "white", padding: 10 };
 
+  const getData = async () => {
+    const id = route.params.report
+    console.log(id)
+    try {
+      const { data } = await axios.get(`${BASE_URL}/report/admin/report/${id}`);
+      // setReportData(data.data);
+      console.log(data);
+      setData(data.report);
+      setStatus(data.report.status || "N/A");
+      setDescription(data.report.original || "");
+      setAddress(data.report.location || "");
+      setPlate(data.report.plateNumber?.plateNumber || "");
+      setConfirmationImages(data.report.confirmationImages || []);
+      const violation = data.report.plateNumber.violations.find(
+        (v) => v.report._id.toString() === data.report._id
+      );
+      setViolations(violation.types);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const pickImage = async () => {
     if (images.length >= 4) {
       alert("You can only add up to 4 images.");
@@ -202,19 +224,9 @@ const DetailReportScreen = ({ route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      const reportData = route.params.report || {};
-      setData(reportData);
-      setStatus(reportData.status || "N/A");
-      setDescription(reportData.original || "");
-      setAddress(reportData.location || "");
-      setPlate(reportData.plateNumber?.plateNumber || "");
-      setConfirmationImages(reportData.confirmationImages || []);
-      const violation = reportData.plateNumber.violations.find(
-        (v) => v.report._id.toString() === reportData._id
-      );
-      setViolations(violation.types)
-      // setImages([]);
-      // console.log(reportData);
+      getData();
+      // const ID = route.params.report
+      // console.log(ID)
     }, [route.params.report])
   );
 

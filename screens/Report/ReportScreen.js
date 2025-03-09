@@ -8,6 +8,7 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  Alert,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -19,7 +20,7 @@ import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import { validateReportForm } from "../../utils/formValidation";
 import PictureModal from "../../utils/pictureModal";
-import * as FileSystem from "expo-file-system"
+import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 
 export default function ReportScreen() {
@@ -35,6 +36,7 @@ export default function ReportScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(null);
+  const [postIt, setPostIt] = useState(false);
 
   const navigation = useNavigation();
 
@@ -58,7 +60,7 @@ export default function ReportScreen() {
         [{ resize: { width: 950 } }],
         { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
       );
-      
+
       setImages((prevImages) => {
         const updatedImages = [...prevImages];
         updatedImages[currentImageIndex] = manipulatedImage.uri;
@@ -129,7 +131,41 @@ export default function ReportScreen() {
   };
 
   const handleSubmit = async () => {
-    const { valid, errors } = validateReportForm(description, address, plate, images);
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`${BASE_URL}/user/profile`);
+      setLoading(false);
+      if (
+        !data.user.address ||
+        !data.user.phoneNumber ||
+        !data.user.firstName ||
+        !data.user.lastName
+      ) {
+        Alert.alert(
+          "Error",
+          "You must provide address, phone number, first name, and last name before submitting a report.",
+          [
+            { text: "OK" },
+            {
+              text: "Go to Profile",
+              onPress: () => navigation.navigate("ProfileScreen"),
+            },
+          ]
+        );
+
+        return;
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error on Fetching Data:", error);
+      navigation.navigate("ReportScreen");
+    }
+    const { valid, errors } = validateReportForm(
+      description,
+      address,
+      plate,
+      images
+    );
     setDescriptionError(errors.descriptionError);
     setAddressError(errors.addressError);
     setPlateError(errors.plateError);
@@ -141,6 +177,19 @@ export default function ReportScreen() {
 
     setLoading(true);
 
+    const userConfirmed = await new Promise((resolve) => {
+      Alert.alert(
+        "Confirmation",
+        "Do you want to post your report on newsfeed?",
+        [
+          { text: "Yes", onPress: () => resolve(true) },
+          { text: "No", onPress: () => resolve(false) },
+        ]
+      );
+    });
+
+    setPostIt(userConfirmed);
+
     const formData = new FormData();
 
     let image = [];
@@ -148,6 +197,7 @@ export default function ReportScreen() {
     formData.append("description", description);
     formData.append("location", address);
     formData.append("plateNumber", plate);
+    formData.append("postIt", postIt);
     image.map((imag) => {
       formData.append("images", imag);
     });
@@ -165,7 +215,7 @@ export default function ReportScreen() {
     } catch (error) {
       setLoading(false);
       console.error("Error on reportScreen:", error);
-      navigate.navigate("ReportScreen");
+      navigation.navigate("ReportScreen");
     }
   };
 
@@ -189,7 +239,12 @@ export default function ReportScreen() {
 
             <TouchableOpacity
               style={styles.imagePlaceholder}
-              onPress={() => showModal("The second picture should be normal but should show the plate number of the vehicle.", 1)}
+              onPress={() =>
+                showModal(
+                  "The second picture should be normal but should show the plate number of the vehicle.",
+                  1
+                )
+              }
             >
               {images[1] ? (
                 <Image source={{ uri: images[1] }} style={styles.image} />
@@ -200,7 +255,12 @@ export default function ReportScreen() {
 
             <TouchableOpacity
               style={styles.imagePlaceholder}
-              onPress={() => showModal("The third picture should be a close-up of the plate number.", 2)}
+              onPress={() =>
+                showModal(
+                  "The third picture should be a close-up of the plate number.",
+                  2
+                )
+              }
             >
               {images[2] ? (
                 <Image source={{ uri: images[2] }} style={styles.image} />
@@ -254,7 +314,9 @@ export default function ReportScreen() {
             onChangeText={setDescription}
             numberOfLines={4}
           />
-          {descriptionError && <Text style={styles.errorText}>{descriptionError}</Text>}
+          {descriptionError && (
+            <Text style={styles.errorText}>{descriptionError}</Text>
+          )}
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Submit</Text>

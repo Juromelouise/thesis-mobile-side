@@ -29,11 +29,28 @@ const DetailObstructionScreen = ({ route }) => {
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const [confirmationImages, setConfirmationImages] = useState([]);
+  // const [reportData, setReportData] = useState({});
   const navigate = useNavigation();
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
   const containerStyle = { backgroundColor: "white", padding: 10 };
+
+  const getData = async () => {
+    const id = route.params.report
+    try {
+      const { data } = await axios.get(`${BASE_URL}/report/admin/obstruction/${id}`);
+      console.log(data.data.original);
+      setData(data);
+      setDescription(data.data.original || "");
+      setAddress(data.data.location || "");
+      setConfirmationImages(data.data.confirmationImages || []);
+      setData(data.data);
+    } catch (e) {
+      console.log(e);
+      navigate.navigate("Home");
+    }
+  };
 
   const pickImage = async () => {
     if (images.length >= 4) {
@@ -127,10 +144,10 @@ const DetailObstructionScreen = ({ route }) => {
       { cancelable: true }
     );
   };
+
   const handleSubmit = async (id) => {
     setLoading(true);
     setVisible(false);
-    // console.log(id);
     const formData = new FormData();
 
     let image = [];
@@ -166,17 +183,10 @@ const DetailObstructionScreen = ({ route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      const reportData = route.params.report || {};
-      setData(reportData);
-      setDescription(reportData.original || "");
-      setAddress(reportData.location || "");
-      setConfirmationImages(reportData.confirmationImages || []);
-      // setImages([]);
-      console.log(route.params.report);
+      getData()
     }, [route.params.report])
   );
 
-  // console.log(data.images);
 
   return (
     <SafeAreaView style={styles.container}>
