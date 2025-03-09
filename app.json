@@ -5,7 +5,7 @@
     "slug": "BOVO",
     "assetBundlePatterns": ["**/*"],
     "version": "1.0.0",
-    "plugins": ["@react-native-google-signin/google-signin"],
+    "plugins": [["@react-native-google-signin/google-signin"]],
     "orientation": "portrait",
     "icon": "./assets/BOVO_logo.png",
     "userInterfaceStyle": "light",

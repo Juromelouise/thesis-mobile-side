@@ -13,6 +13,15 @@ export const setImageUpload = async (images) => {
   return formattedImages;
 };
 
+export const setImageUploadOne = async (image) => {
+  const newImageUri = "file:///" + image.split("file:/").join("");
+  return {
+    uri: newImageUri,
+    type: mime.getType(newImageUri),
+    name: newImageUri.split("/").pop(),
+  };
+};
+
 export const setFormData = async (values) => {
   const formData = new FormData();
 

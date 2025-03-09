@@ -10,6 +10,7 @@ import DetailReportScreen from "../screens/Report/DetailReportScreen";
 import DetailObstructionScreen from "../screens/Report/DetailObstructionScreen";
 import ApproveReports from "../screens/Admin/ApproveReports";
 import ViewApprovedReport from "../screens/Admin/ViewApprovedReport";
+import EditProfileScreen from "../screens/User/EditProfileScreen";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -33,6 +34,11 @@ const Navigator = () => {
       <Stack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditProfileScreen"
+        component={EditProfileScreen}
         options={{ headerShown: false }}
       />
 
