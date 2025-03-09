@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
-  Modal,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -20,6 +19,8 @@ import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import { validateReportForm } from "../../utils/formValidation";
 import PictureModal from "../../utils/pictureModal";
+import * as FileSystem from "expo-file-system"
+import * as ImageManipulator from "expo-image-manipulator";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
@@ -33,16 +34,37 @@ export default function ReportScreen() {
   const [imagesError, setImagesError] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(null);
 
   const navigation = useNavigation();
 
-  const showModal = (message) => {
+  const showModal = (message, index) => {
     setModalMessage(message);
     setModalVisible(true);
+    setCurrentImageIndex(index);
   };
 
-  const pickImage = async (message) => {
-    showModal(message);
+  const openCamera = async () => {
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      // Resize and compress the image
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 950 } }],
+        { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      
+      setImages((prevImages) => {
+        const updatedImages = [...prevImages];
+        updatedImages[currentImageIndex] = manipulatedImage.uri;
+        return updatedImages;
+      });
+    }
   };
 
   const getLocation = async () => {
@@ -78,7 +100,7 @@ export default function ReportScreen() {
 
   const pickImageAndUpload = async () => {
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
+      allowsEditing: false,
       aspect: [8, 4],
       quality: 1,
     });
@@ -155,8 +177,8 @@ export default function ReportScreen() {
 
           <View style={styles.imagesContainer}>
             <TouchableOpacity
-              style={styles.imagePlaceholder}
-              onPress={() => pickImage("The first picture should be wide.")}
+              style={[styles.imagePlaceholder, styles.largeImagePlaceholder]}
+              onPress={() => showModal("The first picture should be wide.", 0)}
             >
               {images[0] ? (
                 <Image source={{ uri: images[0] }} style={styles.image} />
@@ -166,23 +188,22 @@ export default function ReportScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.imagePlaceholder,
-                images.length > 2 && styles.overlayContainer,
-              ]}
-              onPress={() => pickImage("The second picture should be normal but should show the plate number of the vehicle.")}
+              style={styles.imagePlaceholder}
+              onPress={() => showModal("The second picture should be normal but should show the plate number of the vehicle.", 1)}
             >
               {images[1] ? (
-                <>
-                  <Image source={{ uri: images[1] }} style={styles.image} />
-                  {images.length > 2 && (
-                    <View style={styles.overlay}>
-                      <Text style={styles.moreText}>
-                        +{images.length - 2} more
-                      </Text>
-                    </View>
-                  )}
-                </>
+                <Image source={{ uri: images[1] }} style={styles.image} />
+              ) : (
+                <Ionicons name="camera" size={40} color="#888" />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.imagePlaceholder}
+              onPress={() => showModal("The third picture should be a close-up of the plate number.", 2)}
+            >
+              {images[2] ? (
+                <Image source={{ uri: images[2] }} style={styles.image} />
               ) : (
                 <Ionicons name="camera" size={40} color="#888" />
               )}
@@ -250,6 +271,7 @@ export default function ReportScreen() {
       <PictureModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
+        onCloseAndOpenCamera={openCamera}
         message={modalMessage}
       />
     </SafeAreaView>
@@ -267,83 +289,91 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   reportSection: {
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
-    flex: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
   reportText: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
   },
   imagesContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 20,
+    marginBottom: 20,
+    flexWrap: "wrap",
   },
   imagePlaceholder: {
-    width: "45%",
+    width: "48%",
     height: 150,
-    backgroundColor: "#ba9b9b",
+    backgroundColor: "#e0e0e0",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 10,
+  },
+  largeImagePlaceholder: {
+    width: "100%",
+    height: 200,
   },
   image: {
     width: "100%",
     height: "100%",
     borderRadius: 10,
   },
-  overlayContainer: {
-    position: "relative",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-  },
-  moreText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    marginBottom: 20,
   },
   input: {
     flex: 1,
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 10,
+    padding: 15,
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#ccc",
+    color: "#333",
   },
-  clearButton: {
+  cameraButton: {
     marginLeft: 10,
-  },
-  clearButtonText: {
-    fontSize: 18,
-    color: "#000",
+    backgroundColor: "#6e44ff",
+    padding: 10,
+    borderRadius: 10,
   },
   locationButton: {
     marginLeft: 10,
+    backgroundColor: "#6e44ff",
+    padding: 10,
+    borderRadius: 10,
   },
   reasonInput: {
     height: 100,
     textAlignVertical: "top",
-    marginTop: 10,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    color: "#333",
+    marginBottom: 20,
   },
   submitButton: {
     backgroundColor: "#6e44ff",
     borderRadius: 10,
     padding: 15,
     alignItems: "center",
-    marginTop: 20,
   },
   submitButtonText: {
     color: "#fff",

@@ -28,6 +28,7 @@ const DetailReportScreen = ({ route }) => {
   const [address, setAddress] = useState("");
   const [plate, setPlate] = useState("");
   const [status, setStatus] = useState("");
+  const [violations, setViolations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const [confirmationImages, setConfirmationImages] = useState([]);
@@ -208,8 +209,12 @@ const DetailReportScreen = ({ route }) => {
       setAddress(reportData.location || "");
       setPlate(reportData.plateNumber?.plateNumber || "");
       setConfirmationImages(reportData.confirmationImages || []);
+      const violation = reportData.plateNumber.violations.find(
+        (v) => v.report._id.toString() === reportData._id
+      );
+      setViolations(violation.types)
       // setImages([]);
-      console.log(reportData);
+      // console.log(reportData);
     }, [route.params.report])
   );
 
@@ -231,7 +236,7 @@ const DetailReportScreen = ({ route }) => {
               />
             ))}
           </View>
-          
+
           <View style={styles.inputRow}>
             <Text style={styles.label}>Confirmation Images:</Text>
           </View>
@@ -258,8 +263,8 @@ const DetailReportScreen = ({ route }) => {
           <View style={styles.inputRow}>
             <Text style={styles.label}>Violation:</Text>
             <Text style={styles.input}>
-              {data?.plateNumber?.violations?.length > 0
-                ? data?.plateNumber?.violations.join(", ")
+              {violations?.length > 0
+                ? violations?.join(", ")
                 : "No violations reported"}
             </Text>
           </View>

@@ -1,18 +1,23 @@
 import React from "react";
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from "react-native";
 
-const PictureModal = ({ visible, onClose, message }) => {
+const PictureModal = ({ visible, onClose, onCloseAndOpenCamera, message }) => {
+  const handleClose = () => {
+    onClose();
+    onCloseAndOpenCamera();
+  };
+
   return (
     <Modal
       transparent={true}
       animationType="slide"
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>{message}</Text>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>

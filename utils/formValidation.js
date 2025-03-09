@@ -22,7 +22,7 @@ export const validateReportForm = (description, address, plate, images) => {
     valid = false;
   }
 
-  if (images.length !== 4) {
+  if (images.length !== 3) {
     errors.imagesError = "Exactly four images are required";
     valid = false;
   }
@@ -30,7 +30,7 @@ export const validateReportForm = (description, address, plate, images) => {
   return { valid, errors };
 };
 
-export const validateObsForm = (description, address) => {
+export const validateObsForm = (description, address, images) => {
   let valid = true;
   let errors = {
     descriptionError: "",
@@ -44,6 +44,10 @@ export const validateObsForm = (description, address) => {
 
   if (!address) {
     errors.addressError = "Address is required";
+    valid = false;
+  }
+  if (images.length !== 2) {
+    errors.imagesError = "Exactly two images are required";
     valid = false;
   }
 

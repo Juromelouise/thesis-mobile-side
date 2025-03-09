@@ -1,21 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { Avatar, Title, Text, Button, Divider, List } from "react-native-paper";
 import { FontAwesome } from "@expo/vector-icons"; // Corrected import
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState({});
+  const navigation = useNavigation();
 
-  useEffect(() => {
-    axios.get(`${BASE_URL}/user/profile`).then((response) => {
-      setUser(response.data.user);
-      console.log(response.data.user)
-    }).catch((error) => {
-      console.error("Error fetching profile data: ", error);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      axios
+        .get(`${BASE_URL}/user/profile`)
+        .then((response) => {
+          setUser(response.data.user);
+          console.log(response.data.user);
+        })
+        .catch((error) => {
+          console.error("Error fetching profile data: ", error);
+        });
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -40,17 +47,17 @@ const ProfileScreen = () => {
         <List.Section>
           <List.Item
             title="Email"
-            description={user.email || "N/A"} 
+            description={user.email || "N/A"}
             left={() => <List.Icon icon="email" />}
           />
           <List.Item
             title="Phone"
-            description={user.phoneNumber || "N/A"} 
+            description={user.phoneNumber || "N/A"}
             left={() => <List.Icon icon="phone" />}
           />
           <List.Item
             title="Location"
-            description={user.address || "N/A"} 
+            description={user.address || "N/A"}
             left={() => <List.Icon icon="map-marker" />}
           />
         </List.Section>
@@ -60,7 +67,7 @@ const ProfileScreen = () => {
 
       <Button
         mode="contained"
-        onPress={() => console.log("Edit Profile Pressed")}
+        onPress={() => navigation.navigate("EditProfileScreen", { user })}
         style={styles.button}
       >
         Edit Profile
