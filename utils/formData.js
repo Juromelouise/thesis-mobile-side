@@ -9,7 +9,7 @@ export const setImageUpload = async (images) => {
       name: newImageUri.split("/").pop(),
     };
   });
-  console.log(formattedImages);
+  // console.log(formattedImages);
   return formattedImages;
 };
 

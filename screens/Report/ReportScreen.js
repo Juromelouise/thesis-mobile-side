@@ -19,8 +19,6 @@ import axios from "axios";
 import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import { validateReportForm } from "../../utils/formValidation";
-import PictureModal from "../../utils/pictureModal";
-import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 
 export default function ReportScreen() {
@@ -33,20 +31,11 @@ export default function ReportScreen() {
   const [addressError, setAddressError] = useState("");
   const [plateError, setPlateError] = useState("");
   const [imagesError, setImagesError] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(null);
   const [postIt, setPostIt] = useState(false);
 
   const navigation = useNavigation();
 
-  const showModal = (message, index) => {
-    setModalMessage(message);
-    setModalVisible(true);
-    setCurrentImageIndex(index);
-  };
-
-  const openCamera = async () => {
+  const openCamera = async (index) => {
     let result = await ImagePicker.launchCameraAsync({
       allowsEditing: false,
       aspect: [4, 3],
@@ -63,10 +52,28 @@ export default function ReportScreen() {
 
       setImages((prevImages) => {
         const updatedImages = [...prevImages];
-        updatedImages[currentImageIndex] = manipulatedImage.uri;
+        updatedImages[index] = manipulatedImage.uri;
         return updatedImages;
       });
     }
+  };
+
+  const showImageAlert = (message, index) => {
+    Alert.alert(
+      "Image Selection",
+      message,
+      [
+        {
+          text: "Open Camera",
+          onPress: () => openCamera(index),
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const getLocation = async () => {
@@ -91,7 +98,6 @@ export default function ReportScreen() {
       if (reverseGeocode.length > 0) {
         const { street, city, region } = reverseGeocode[0];
         setAddress(`${street}, ${city}, ${region}`);
-        console.log("Address:", `${street}, ${city}, ${region}`);
       }
     } catch (error) {
       console.error("Error fetching location:", error);
@@ -184,7 +190,8 @@ export default function ReportScreen() {
         [
           { text: "Yes", onPress: () => resolve(true) },
           { text: "No", onPress: () => resolve(false) },
-        ]
+        ],
+        { cancelable: false }
       );
     });
 
@@ -228,7 +235,7 @@ export default function ReportScreen() {
           <View style={styles.imagesContainer}>
             <TouchableOpacity
               style={[styles.imagePlaceholder, styles.largeImagePlaceholder]}
-              onPress={() => showModal("The first picture should be wide.", 0)}
+              onPress={() => showImageAlert("The first picture should be wide.", 0)}
             >
               {images[0] ? (
                 <Image source={{ uri: images[0] }} style={styles.image} />
@@ -240,7 +247,7 @@ export default function ReportScreen() {
             <TouchableOpacity
               style={styles.imagePlaceholder}
               onPress={() =>
-                showModal(
+                showImageAlert(
                   "The second picture should be normal but should show the plate number of the vehicle.",
                   1
                 )
@@ -256,7 +263,7 @@ export default function ReportScreen() {
             <TouchableOpacity
               style={styles.imagePlaceholder}
               onPress={() =>
-                showModal(
+                showImageAlert(
                   "The third picture should be a close-up of the plate number.",
                   2
                 )
@@ -329,13 +336,6 @@ export default function ReportScreen() {
           <ActivityIndicator size="large" color="#6e44ff" />
         </View>
       )}
-
-      <PictureModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onCloseAndOpenCamera={openCamera}
-        message={modalMessage}
-      />
     </SafeAreaView>
   );
 }
