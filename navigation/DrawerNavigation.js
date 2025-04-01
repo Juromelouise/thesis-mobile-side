@@ -25,7 +25,6 @@ const CustomDrawerContent = ({ navigation }) => {
         .get(`${BASE_URL}/user/profile`)
         .then((response) => {
           setUser(response.data.user);
-          // console.log(response.data.user);
         })
         .catch((error) => {
           console.error("Error fetching profile data: ", error);
@@ -140,14 +139,23 @@ const CustomDrawerContent = ({ navigation }) => {
       {/* Dropdown for Admin options */}
       {isAdminDropdownOpen && (
         <View style={styles.dropdownContainer}>
-          <TouchableOpacity
+           <TouchableOpacity
             onPress={() => {
               navigation.navigate("Approve Reports");
             }}
             style={styles.dropdownButton}
           >
-            <Icon name="check" size={16} color="#333" style={styles.icon} />
+            <Icon name="file-text" size={16} color="#333" style={styles.icon} />
             <Text style={styles.dropdownButtonText}>All Approve Reports</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Approve Obstruction");
+            }}
+            style={styles.dropdownButton}
+          >
+            <Icon name="road" size={16} color="#333" style={styles.icon} />
+            <Text style={styles.dropdownButtonText}>Approve Obstructions</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -212,6 +220,12 @@ const DrawerNavigation = () => {
           component={Navigator}
           initialParams={{ screen: "ApproveReports" }}
           options={{ title: "Approve Reports" }}
+        />
+         <Drawer.Screen
+          name="Approve Obstruction"
+          component={Navigator}
+          initialParams={{ screen: "ApproveObstruction" }}
+          options={{ title: "Approve Obstruction" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>

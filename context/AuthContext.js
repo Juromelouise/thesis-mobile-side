@@ -18,7 +18,6 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    console.log(BASE_URL)
     GoogleSignin.configure({
       webClientId:
         "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",

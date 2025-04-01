@@ -7,7 +7,6 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { Button, ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 
-
 const ViewApprovedReport = ({ route }) => {
   const { report } = route.params;
   const [confirmationImages, setConfirmationImages] = useState([]);
@@ -78,7 +77,6 @@ const ViewApprovedReport = ({ route }) => {
       });
       formData.append("status", "Resolved");
 
-      console.log(formData);
       setLoading(true);
 
       const response = await axios.put(
@@ -96,12 +94,12 @@ const ViewApprovedReport = ({ route }) => {
         setLoading(false);
         navigation.navigate("ApproveReports");
       } else {
-        setLoading(false)
+        setLoading(false);
         Alert.alert("Error", "Failed to update report status.");
       }
     } catch (error) {
       console.log(error);
-      setLoading(false)
+      setLoading(false);
       Alert.alert(
         "Error",
         "An error occurred while updating the report status."
@@ -115,62 +113,39 @@ const ViewApprovedReport = ({ route }) => {
         Approved Report
       </Animated.Text>
       <Animated.View entering={FadeInUp} style={styles.reportCard}>
-        {report && report.plateNumber ? (
-          <>
-            <Text style={styles.reportTitle}>
-              Plate Number:{" "}
-              {report.plateNumber ? report.plateNumber.plateNumber : "N/A"}
-            </Text>
-          </>
-        ) : (
-          <>
-            <Text style={styles.reportTitle}>Obstruction:</Text>
-          </>
-        )}
+        <Text style={styles.reportTitle}>Plate Number: {report.plateNumber}</Text>
+        <Text style={styles.reportDescription}>Count: {report.count}</Text>
         <Text style={styles.reportDescription}>
-          Description: {report.original}
+          Created At: {new Date(report.createdAt).toLocaleString()}
         </Text>
-        {report && report.plateNumber ? (
-          <>
-            <Text style={styles.reportDescription}>
-              Violations: {report.plateNumber.violations.join(", ")}
+
+        <Text style={styles.sectionHeader}>Violations:</Text>
+        {report.violations.map((violation, index) => (
+          <View key={index} style={styles.violationItem}>
+            <Text style={styles.violationText}>
+              Types: {violation.types.join(", ")}
             </Text>
-          </>
-        ) : (
-          <>
-            <Text style={styles.reportDescription}>
-              Violations: {report.violations.join(", ")}
-            </Text>
-          </>
-        )}
-        <Text style={styles.reportLocation}>Location: {report.location}</Text>
-        <Text style={styles.reportStatus}>Status: {report.status}</Text>
-        <Text style={styles.reportDate}>
-          Reported At: {new Date(report.createdAt).toLocaleString()}
-        </Text>
-        <View style={styles.reporterInfo}>
-          <Text style={styles.reporterName}>
-            Reporter: {report.reporter.firstName} {report.reporter.lastName}
-          </Text>
-          <Text style={styles.reporterEmail}>
-            Email: {report.reporter.email}
-          </Text>
-          <Text style={styles.reporterCount}>
-            Reports Count:{" "}
-            {report.plateNumber ? report.plateNumber.count : "N/A"}
-          </Text>
-        </View>
-        {report.images && report.images.length > 0 && (
-          <View style={styles.imagesContainer}>
-            {report.images.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image.url }}
-                style={styles.image}
-              />
-            ))}
           </View>
-        )}
+        ))}
+
+        <Text style={styles.sectionHeader}>Report Details:</Text>
+        {report.reportDetails.map((detail, index) => (
+          <View key={index} style={styles.reportDetailItem}>
+            <Text style={styles.reportDetailText}>
+              Description: {detail.description}
+            </Text>
+            <Text style={styles.reportDetailText}>
+              Location: {detail.location}
+            </Text>
+            <Text style={styles.reportDetailText}>
+              Status: {detail.status}
+            </Text>
+            <Text style={styles.reportDetailText}>
+              Created At: {new Date(detail.createdAt).toLocaleString()}
+            </Text>
+          </View>
+        ))}
+
         <Button
           mode="contained"
           onPress={handleImageSelection}
@@ -243,39 +218,26 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 10,
   },
-  reportLocation: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 10,
-  },
-  reportStatus: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 10,
-  },
-  reportDate: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 10,
-  },
-  reporterInfo: {
-    marginTop: 20,
-  },
-  reporterName: {
-    fontSize: 16,
+  sectionHeader: {
+    fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 5,
-  },
-  reporterEmail: {
-    fontSize: 16,
-    color: "#666",
+    marginTop: 20,
     marginBottom: 10,
   },
-  reporterCount: {
+  violationItem: {
+    marginBottom: 10,
+  },
+  violationText: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 10,
+  },
+  reportDetailItem: {
+    marginBottom: 15,
+  },
+  reportDetailText: {
+    fontSize: 16,
+    color: "#666",
   },
   imagesContainer: {
     marginTop: 20,

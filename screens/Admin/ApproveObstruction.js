@@ -1,20 +1,13 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import React, { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
 import { useNavigation } from "@react-navigation/native";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Card, Title, Paragraph } from "react-native-paper";
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { Card, Title, Paragraph } from 'react-native-paper';
 
-const ApproveReports = () => {
+const ApproveObstruction = () => {
   const [data, setData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
@@ -22,9 +15,10 @@ const ApproveReports = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/report/admin/report/report/approved`
+        `${BASE_URL}/report/admin/obstruction/report/approved`
       );
       setData(response.data.data);
+      // console.log(response.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -62,11 +56,8 @@ const ApproveReports = () => {
           >
             <Card style={styles.card}>
               <Card.Content>
-                <Title style={styles.reportTitle}>{report?.plateNumber}</Title>
-                <Paragraph style={styles.reportDescription}>
-                  Violations:{" "}
-                  {report?.violations.map((v) => v.types.join(", ")).join("; ")}
-                </Paragraph>
+                <Title style={styles.reportTitle}>{report.location}</Title>
+                <Paragraph style={styles.reportDescription}>{report.original}</Paragraph>
               </Card.Content>
             </Card>
           </Animated.View>
@@ -76,7 +67,7 @@ const ApproveReports = () => {
   );
 };
 
-export default ApproveReports;
+export default ApproveObstruction;
 
 const styles = StyleSheet.create({
   container: {
