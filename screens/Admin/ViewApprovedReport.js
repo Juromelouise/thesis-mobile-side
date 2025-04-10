@@ -25,6 +25,8 @@ const ViewApprovedReport = ({ route }) => {
     }
   };
 
+  console.log(report)
+
   const takePicture = async () => {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,

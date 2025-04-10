@@ -39,22 +39,28 @@ const DetailReportScreen = ({ route }) => {
   const containerStyle = { backgroundColor: "white", padding: 10 };
 
   const getData = async () => {
-    const id = route.params.report
-    console.log(id)
+    const id = route.params.report;
     try {
       const { data } = await axios.get(`${BASE_URL}/report/admin/report/${id}`);
-      // setReportData(data.data);
-      console.log(data);
       setData(data.report);
       setStatus(data.report.status || "N/A");
       setDescription(data.report.original || "");
       setAddress(data.report.location || "");
       setPlate(data.report.plateNumber?.plateNumber || "");
-      setConfirmationImages(data.report.confirmationImages || []);
-      const violation = data.report.plateNumber.violations.find(
-        (v) => v.report._id.toString() === data.report._id
-      );
-      setViolations(violation.types);
+      setConfirmationImages(data?.report?.confirmationImages || []);
+
+      console.log("Report Data:", data.report.plateNumber.violations);
+
+      if (
+        data.report.plateNumber &&
+        Array.isArray(data.report.plateNumber.violations)
+      ) {
+        const flattenedViolations = data.report.plateNumber.violations.flat();
+
+        setViolations(flattenedViolations || []);
+      } else {
+        setViolations([]);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -74,7 +80,6 @@ const DetailReportScreen = ({ route }) => {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setImages((prevImages) => {
         const updatedImages = [...prevImages, result.assets[0].uri].slice(0, 4);
-        console.log("Updated images:", updatedImages);
         return updatedImages;
       });
     }
@@ -151,7 +156,7 @@ const DetailReportScreen = ({ route }) => {
         {
           text: "Cancel",
           onPress: () => console.log("User canceled the delete action."),
-          style: "cancel", // iOS-specific style for cancel button
+          style: "cancel",
         },
         {
           text: "Delete",
@@ -187,12 +192,10 @@ const DetailReportScreen = ({ route }) => {
   const handleSubmit = async (id) => {
     setLoading(true);
     setVisible(false);
-    // console.log(id);
     const formData = new FormData();
 
     let image = [];
     image = await setImageUpload(images);
-    console.log(image);
     formData.append("description", description);
     formData.append("location", address);
     formData.append("plateNumber", plate);
@@ -225,12 +228,8 @@ const DetailReportScreen = ({ route }) => {
   useFocusEffect(
     useCallback(() => {
       getData();
-      // const ID = route.params.report
-      // console.log(ID)
     }, [route.params.report])
   );
-
-  // console.log(data);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -353,7 +352,6 @@ const DetailReportScreen = ({ route }) => {
                   )}
                 </View>
 
-                {/* Add Image Button */}
                 <TouchableOpacity
                   style={styles.addImageButton}
                   onPress={pickImage}
@@ -362,7 +360,6 @@ const DetailReportScreen = ({ route }) => {
                   <Text style={styles.addImageButtonText}>Add Image</Text>
                 </TouchableOpacity>
 
-                {/* Plate Number Input */}
                 <View style={styles.inputRowWithIcon}>
                   <TextInput
                     style={[styles.input, styles.inputWithIcon]}
@@ -379,7 +376,6 @@ const DetailReportScreen = ({ route }) => {
                   </TouchableOpacity>
                 </View>
 
-                {/* Location Input */}
                 <View style={styles.inputRowWithIcon}>
                   <TextInput
                     style={[styles.input, styles.inputWithIcon]}
@@ -407,7 +403,6 @@ const DetailReportScreen = ({ route }) => {
                   numberOfLines={4}
                 />
 
-                {/* Submit Button */}
                 <TouchableOpacity
                   style={styles.submitButton}
                   onPress={() => {

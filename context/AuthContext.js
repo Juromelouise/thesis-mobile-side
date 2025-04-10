@@ -100,7 +100,6 @@ export const AuthProvider = ({ children }) => {
       .then(() => {
         GoogleSignin.signIn()
           .then(({ data }) => {
-            console.log(data);
             const googleCredential = auth.GoogleAuthProvider.credential(
               data.idToken
             );
@@ -119,7 +118,6 @@ export const AuthProvider = ({ children }) => {
               });
           })
           .then((response) => {
-            console.log(response.data);
             return AsyncStorage.setItem("userToken", response.data.token).then(
               () => {
                 setUserToken(response.data.token);
