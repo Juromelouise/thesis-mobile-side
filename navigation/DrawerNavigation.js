@@ -139,7 +139,7 @@ const CustomDrawerContent = ({ navigation }) => {
       {/* Dropdown for Admin options */}
       {isAdminDropdownOpen && (
         <View style={styles.dropdownContainer}>
-           <TouchableOpacity
+          <TouchableOpacity
             onPress={() => {
               navigation.navigate("Approve Reports");
             }}
@@ -178,57 +178,55 @@ const CustomDrawerContent = ({ navigation }) => {
 
 const DrawerNavigation = () => {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator
-        initialRouteName="Home"
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-      >
-        <Drawer.Screen
-          name="Home"
-          component={Navigator}
-          initialParams={{ screen: "HomeScreen" }}
-          options={{ title: "Home" }}
-        />
-        <Drawer.Screen
-          name="Illegal Parking"
-          component={Navigator}
-          initialParams={{ screen: "ReportScreen" }}
-          options={{ title: "Report Illegal Parking" }}
-        />
-        <Drawer.Screen
-          name="Obstruction"
-          component={Navigator}
-          initialParams={{ screen: "ObstructionScreen" }}
-          options={{ title: "Report Obstruction" }}
-        />
-        <Drawer.Screen
-          name="Profile"
-          component={Navigator}
-          initialParams={{ screen: "ProfileScreen" }}
-          options={{ title: "Profile" }}
-        />
-        <Drawer.Screen
-          name="List"
-          component={Navigator}
-          initialParams={{ screen: "ReportListScreen" }}
-          options={{ title: "List of Report" }}
-        />
+    <Drawer.Navigator
+      initialRouteName="Home"
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
+      <Drawer.Screen
+        name="Home"
+        component={Navigator}
+        initialParams={{ screen: "HomeScreen" }}
+        options={{ title: "Home" }}
+      />
+      <Drawer.Screen
+        name="Illegal Parking"
+        component={Navigator}
+        initialParams={{ screen: "ReportScreen" }}
+        options={{ title: "Report Illegal Parking" }}
+      />
+      <Drawer.Screen
+        name="Obstruction"
+        component={Navigator}
+        initialParams={{ screen: "ObstructionScreen" }}
+        options={{ title: "Report Obstruction" }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={Navigator}
+        initialParams={{ screen: "ProfileScreen" }}
+        options={{ title: "Profile" }}
+      />
+      <Drawer.Screen
+        name="List"
+        component={Navigator}
+        initialParams={{ screen: "ReportListScreen" }}
+        options={{ title: "List of Report" }}
+      />
 
-        {/* ADMIN */}
-        <Drawer.Screen
-          name="Approve Reports"
-          component={Navigator}
-          initialParams={{ screen: "ApproveReports" }}
-          options={{ title: "Approve Reports" }}
-        />
-         <Drawer.Screen
-          name="Approve Obstruction"
-          component={Navigator}
-          initialParams={{ screen: "ApproveObstruction" }}
-          options={{ title: "Approve Obstruction" }}
-        />
-      </Drawer.Navigator>
-    </NavigationContainer>
+      {/* ADMIN */}
+      <Drawer.Screen
+        name="Approve Reports"
+        component={Navigator}
+        initialParams={{ screen: "ApproveReports" }}
+        options={{ title: "Approve Reports" }}
+      />
+      <Drawer.Screen
+        name="Approve Obstruction"
+        component={Navigator}
+        initialParams={{ screen: "ApproveObstruction" }}
+        options={{ title: "Approve Obstruction" }}
+      />
+    </Drawer.Navigator>
   );
 };
 
