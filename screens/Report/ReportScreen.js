@@ -213,10 +213,10 @@ export default function ReportScreen() {
       await axios.post(`${BASE_URL}/report/post/report`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setAddress("");
-      setDescription("");
-      setPlate("");
-      setImages([]);
+      // setAddress("");
+      // setDescription("");
+      // setPlate("");
+      // setImages([]);
       setLoading(false);
       navigation.navigate("Home");
     } catch (error) {

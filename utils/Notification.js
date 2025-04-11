@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import axios from "axios";
 
-export const registerForPushNotificationsAsync = async (baseUrl) => {
+export const registerForPushNotificationsAsync = async (baseUrl, currentPushToken) => {
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -17,17 +17,15 @@ export const registerForPushNotificationsAsync = async (baseUrl) => {
   }
 
   const token = (await Notifications.getExpoPushTokenAsync()).data;
-  console.log(token)
   if (token !== currentPushToken) {
-    
-    // try {
-    //   await axios.put(`${baseUrl}/user/update-push-token`, {
-    //     expoPushToken: token,
-    //   });
-    //   console.log("Push token updated successfully");
-    // } catch (error) {
-    //   console.error("Error updating push token:", error);
-    // }
+    try {
+      await axios.put(`${baseUrl}/user/update-push-token`, {
+        expoPushToken: token,
+      });
+      console.log("Push token updated successfully");
+    } catch (error) {
+      console.error("Error updating push token:", error);
+    }
   } else {
     console.log("Push token is already up-to-date");
   }
@@ -39,6 +37,6 @@ Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
-    shouldSetBadge: false,
+    shouldSetBadge: true,
   }),
 });
