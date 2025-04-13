@@ -4,5 +4,5 @@
 export const BASE_URL = "http://192.168.100.161:4000";
 // export const BASE_URL = "http://172.20.10.12:4000";
 // export const API_URL =  "https://plate-recog-642593357289.asia-east1.run.app";
-// export const API_URL =  "http://0.0.0.0:8000";
-export const API_URL =  "https://plate-recog-642593357289.asia-east1.run.app";
+export const API_URL =  "http://192.168.100.161:8000";
+// export const API_URL =  "https://plate-recog-642593357289.asia-east1.run.app";

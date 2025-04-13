@@ -25,8 +25,6 @@ const ViewApprovedReport = ({ route }) => {
     }
   };
 
-  console.log(report)
-
   const takePicture = async () => {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -78,6 +76,13 @@ const ViewApprovedReport = ({ route }) => {
         });
       });
       formData.append("status", "Resolved");
+      formData.append("plateId", report._id);
+      
+      if (report.reportDetails && report.reportDetails.length > 0) {
+        report.reportDetails.forEach((detail) => {
+          formData.append("reportId", detail._id); 
+        });
+      }
 
       setLoading(true);
 
