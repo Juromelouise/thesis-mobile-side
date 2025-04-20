@@ -32,6 +32,7 @@ export default function ReportScreen() {
   const [plateError, setPlateError] = useState("");
   const [imagesError, setImagesError] = useState("");
   const [postIt, setPostIt] = useState(false);
+  const [geocode, setGeocode] = useState(null);
 
   const navigation = useNavigation();
 
@@ -88,6 +89,11 @@ export default function ReportScreen() {
 
       let loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
+      });
+
+      setGeocode({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
       });
 
       const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -198,13 +204,13 @@ export default function ReportScreen() {
     setPostIt(userConfirmed);
 
     const formData = new FormData();
-
     let image = [];
     image = await setImageUpload(images);
     formData.append("description", description);
     formData.append("location", address);
     formData.append("plateNumber", plate);
     formData.append("postIt", postIt);
+    formData.append("geocodeData", JSON.stringify(geocode));
     image.map((imag) => {
       formData.append("images", imag);
     });
@@ -213,10 +219,16 @@ export default function ReportScreen() {
       await axios.post(`${BASE_URL}/report/post/report`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      // setAddress("");
+      setAddress("");
       // setDescription("");
       // setPlate("");
       // setImages([]);
+      setPostIt(false);
+      setDescriptionError("");
+      setAddressError("");
+      setPlateError("");
+      setImagesError("");
+      setGeocode(null);
       setLoading(false);
       navigation.navigate("Home");
     } catch (error) {
@@ -235,7 +247,9 @@ export default function ReportScreen() {
           <View style={styles.imagesContainer}>
             <TouchableOpacity
               style={[styles.imagePlaceholder, styles.largeImagePlaceholder]}
-              onPress={() => showImageAlert("The first picture should be wide.", 0)}
+              onPress={() =>
+                showImageAlert("The first picture should be wide.", 0)
+              }
             >
               {images[0] ? (
                 <Image source={{ uri: images[0] }} style={styles.image} />
