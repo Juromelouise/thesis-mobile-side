@@ -3,6 +3,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 import React, { useContext, useState, useCallback } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
+import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../context/AuthContext";
 import Navigator from "./Navigator";
@@ -58,6 +59,16 @@ const CustomDrawerContent = ({ navigation }) => {
       >
         <Icon name="user" size={20} color="#333" style={styles.icon} />
         <Text style={styles.drawerButtonText}>Profile</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Announcements");
+        }}
+        style={styles.drawerButton}
+      >
+        <MaterialIcon name="announcement" size={20} color="#333" style={styles.icon} />
+        <Text style={styles.drawerButtonText}>Announcements</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -225,6 +236,12 @@ const DrawerNavigation = () => {
         component={Navigator}
         initialParams={{ screen: "ApproveObstruction" }}
         options={{ title: "Approve Obstruction" }}
+      />
+      <Drawer.Screen
+        name="Announcements"
+        component={Navigator}
+        initialParams={{ screen: "AnnouncementsScreen" }}
+        options={{ title: "Announcements" }}
       />
     </Drawer.Navigator>
   );
