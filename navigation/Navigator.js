@@ -14,6 +14,7 @@ import EditProfileScreen from "../screens/User/EditProfileScreen";
 import ApproveObstruction from "../screens/Admin/ApproveObstruction";
 import AnnouncementsScreen from "../screens/AnnouncementsScreen";
 import ViewAnnouncementScreen from "../screens/ViewAnnouncementScreen";
+import ViewReportScreen from "../screens/ViewReportScreen";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -81,6 +82,10 @@ const Navigator = () => {
       <Stack.Screen
         name="ViewAnnouncementScreen"
         component={ViewAnnouncementScreen}
+        options={{ headerShown: false }}/>
+      <Stack.Screen
+        name="ViewReportScreen"
+        component={ViewReportScreen}
         options={{ headerShown: false }}/>
     </Stack.Navigator>
   );

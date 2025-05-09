@@ -15,8 +15,9 @@ import axios from "axios";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { BASE_URL } from "../assets/common/config";
 
-const ReportCard = ({ createdAt, location, images, description }) => {
+const ReportCard = ({ createdAt, location, images, description, navigation, id }) => {
   return (
+    <TouchableOpacity onPress={() => navigation.navigate("ViewReportScreen", { id })}>
     <View style={styles.card}>
       {/* Header Section */}
       <View style={styles.header}>
@@ -68,6 +69,7 @@ const ReportCard = ({ createdAt, location, images, description }) => {
         </ScrollView>
       </View>
     </View>
+    </TouchableOpacity>
   );
 };
 
@@ -107,6 +109,8 @@ const HomeScreen = () => {
           location={item.location}
           images={item.images}
           description={item.original}
+          navigation={navigation}
+          id={item._id}
         />
       )}
       contentContainerStyle={styles.container}
