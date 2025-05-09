@@ -3,10 +3,13 @@ import React from "react";
 import axios from "axios";
 import { BASE_URL } from "../assets/common/config";
 import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { TouchableOpacity } from "react-native";
 
 const AnnouncementsScreen = () => {
   const [announcements, setAnnouncements] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const navigation = useNavigation();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -33,6 +36,7 @@ const AnnouncementsScreen = () => {
   };
 
   const renderAnnouncement = ({ item }) => (
+    <TouchableOpacity onPress={() => navigation.navigate("ViewAnnouncementScreen", { item })}>
     <View style={styles.announcementCard}>
       {item.picture && item.picture.length > 0 && (
         <Image
@@ -47,6 +51,7 @@ const AnnouncementsScreen = () => {
         </Text>
       </View>
     </View>
+    </TouchableOpacity>
   );
 
   if (loading) {

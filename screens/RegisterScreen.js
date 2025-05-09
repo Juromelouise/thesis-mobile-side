@@ -11,9 +11,6 @@ import {
 import { Button, Avatar } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import { BASE_URL } from "../assets/common/config";
-import axios from "axios";
-import { setFormData } from "../utils/formData";
 import mime from "mime";
 import { AuthContext } from "../context/AuthContext";
 
