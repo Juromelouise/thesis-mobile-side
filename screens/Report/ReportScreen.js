@@ -201,15 +201,13 @@ export default function ReportScreen() {
       );
     });
 
-    setPostIt(userConfirmed);
-
     const formData = new FormData();
     let image = [];
     image = await setImageUpload(images);
     formData.append("description", description);
     formData.append("location", address);
     formData.append("plateNumber", plate);
-    formData.append("postIt", postIt);
+    formData.append("postIt", userConfirmed);
     formData.append("geocodeData", JSON.stringify(geocode));
     image.map((imag) => {
       formData.append("images", imag);
@@ -219,11 +217,10 @@ export default function ReportScreen() {
       await axios.post(`${BASE_URL}/report/post/report`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setAddress("");
+      // setAddress("");
       // setDescription("");
       // setPlate("");
       // setImages([]);
-      setPostIt(false);
       setDescriptionError("");
       setAddressError("");
       setPlateError("");

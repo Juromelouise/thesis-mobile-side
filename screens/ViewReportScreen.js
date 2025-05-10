@@ -95,7 +95,7 @@ const ViewReportScreen = ({ route }) => {
           showsHorizontalScrollIndicator={false}
           style={styles.imageScroll}
         >
-          {data.imagesAdmin?.map((image, index) => (
+          {data.images?.map((image, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => handleImagePress(index)}
