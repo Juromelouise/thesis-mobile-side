@@ -56,9 +56,9 @@ const ReportCard = ({ createdAt, location, images, description, navigation, id }
           />
         ))}
         {images.length > 2 && (
-          <TouchableOpacity style={styles.overlay}>
+          <View style={styles.overlay}>
             <Text style={styles.plusText}>+{images.length - 2}</Text>
-          </TouchableOpacity>
+          </View>
         )}
       </View>
 

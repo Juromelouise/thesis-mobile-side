@@ -8,9 +8,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  Modal,
 } from "react-native";
 import axios from "axios";
 import { BASE_URL } from "../assets/common/config";
+import Gallery from "react-native-awesome-gallery";
 
 const ViewReportScreen = ({ route }) => {
   const { id } = route.params;
@@ -18,6 +20,8 @@ const ViewReportScreen = ({ route }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +41,14 @@ const ViewReportScreen = ({ route }) => {
     fetchData();
   }, [id]);
 
+  console.log(
+    data?.images
+      ?.filter((image) => image?.url) // Filter out invalid entries
+      ?.map((image) => ({
+        uri: image.url, // Map the `url` property to `uri`
+      }))
+  );
+
   const handleAddComment = async () => {
     try {
       const response = await axios.post(`${BASE_URL}/comment/${id}/comment`, {
@@ -47,6 +59,11 @@ const ViewReportScreen = ({ route }) => {
     } catch (error) {
       console.error("Error adding comment:", error);
     }
+  };
+
+  const handleImagePress = (index) => {
+    setSelectedImageIndex(index);
+    setIsGalleryVisible(true);
   };
 
   if (loading) {
@@ -79,50 +96,84 @@ const ViewReportScreen = ({ route }) => {
           style={styles.imageScroll}
         >
           {data.imagesAdmin?.map((image, index) => (
-            <Image
+            <TouchableOpacity
               key={index}
-              source={{ uri: image.url }}
-              style={styles.fullImage}
-            />
+              onPress={() => handleImagePress(index)}
+            >
+              <Image source={{ uri: image.url }} style={styles.fullImage} />
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
 
       {/* Comments Section */}
-<View style={styles.commentsSection}>
-  <Text style={styles.commentsTitle}>Comments</Text>
-  <ScrollView style={styles.commentsList}>
-    {comments.length > 0 ? (
-      comments.map((comment) => (
-        <View key={comment._id} style={styles.commentCard}>
-          <Text style={styles.commentUser}>
-            {comment.user?.firstName + " " + comment.user?.lastName || "Anonymous"}
-          </Text>
-          <Text style={styles.commentContent}>{comment.content}</Text>
-          <Text style={styles.commentDate}>
-            {new Date(comment.createdAt).toLocaleDateString()}
-          </Text>
-        </View>
-      ))
-    ) : (
-      <Text style={styles.noCommentsText}>No comments yet.</Text>
-    )}
-  </ScrollView>
+      <View style={styles.commentsSection}>
+        <Text style={styles.commentsTitle}>Comments</Text>
+        <ScrollView style={styles.commentsList}>
+          {comments.length > 0 ? (
+            comments.map((comment) => (
+              <View key={comment._id} style={styles.commentCard}>
+                <Text style={styles.commentUser}>
+                  {comment.user?.firstName + " " + comment.user?.lastName ||
+                    "Anonymous"}
+                </Text>
+                <Text style={styles.commentContent}>{comment.content}</Text>
+                <Text style={styles.commentDate}>
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noCommentsText}>No comments yet.</Text>
+          )}
+        </ScrollView>
 
-  {/* Add Comment Section */}
-  <View style={styles.addCommentContainer}>
-    <TextInput
-      style={styles.commentInput}
-      placeholder="Write your comment here..."
-      value={newComment}
-      onChangeText={setNewComment}
-      multiline
-    />
-    <TouchableOpacity style={styles.submitButton} onPress={handleAddComment}>
-      <Text style={styles.submitButtonText}>Submit</Text>
-    </TouchableOpacity>
-  </View>
-</View>
+        {/* Add Comment Section */}
+        <View style={styles.addCommentContainer}>
+          <TextInput
+            style={styles.commentInput}
+            placeholder="Write your comment here..."
+            value={newComment}
+            onChangeText={setNewComment}
+            multiline
+          />
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleAddComment}
+          >
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Full-Screen Image Gallery */}
+      {isGalleryVisible && (
+        <Modal visible={isGalleryVisible} transparent={true}>
+          <View style={styles.galleryContainer}>
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setIsGalleryVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+
+            {/* Gallery Component */}
+            <Gallery
+              data={data?.images
+                ?.filter((image) => typeof image?.url === "string") 
+                ?.map((image) => image.url)} 
+              initialIndex={selectedImageIndex}
+              onSwipeToClose={() => setIsGalleryVisible(false)}
+              numToRender={5} 
+              emptySpaceWidth={20}
+              doubleTapScale={2}
+              maxScale={4}
+              loop={true} 
+            />
+          </View>
+        </Modal>
+      )}
     </ScrollView>
   );
 };
@@ -130,11 +181,29 @@ const ViewReportScreen = ({ route }) => {
 export default ViewReportScreen;
 
 const styles = StyleSheet.create({
+  galleryContainer: {
+    flex: 1,
+    backgroundColor: "black", // Background color for the gallery
+  },
+  closeButton: {
+    position: "absolute",
+    top: 40, // Adjust for safe area
+    right: 20,
+    zIndex: 10, // Ensure the button is above the gallery
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    borderRadius: 20,
+    padding: 10,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   container: {
     padding: 20,
     backgroundColor: "#f9f9f9",
   },
-   card: {
+  card: {
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 15,
