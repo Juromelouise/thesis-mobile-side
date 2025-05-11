@@ -73,6 +73,16 @@ const CustomDrawerContent = ({ navigation }) => {
 
       <TouchableOpacity
         onPress={() => {
+          navigation.navigate("Street Map");
+        }}
+        style={styles.drawerButton}
+      >
+        <MaterialIcon name="announcement" size={20} color="#333" style={styles.icon} />
+        <Text style={styles.drawerButtonText}>Street Map</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
           navigation.navigate("List");
         }}
         style={styles.drawerButton}
@@ -242,6 +252,12 @@ const DrawerNavigation = () => {
         component={Navigator}
         initialParams={{ screen: "AnnouncementsScreen" }}
         options={{ title: "Announcements" }}
+      />
+      <Drawer.Screen
+        name="Street Map"
+        component={Navigator}
+        initialParams={{ screen: "StreetScreen" }}
+        options={{ title: "Street Map" }}
       />
     </Drawer.Navigator>
   );

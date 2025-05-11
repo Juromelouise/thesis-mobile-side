@@ -26,7 +26,12 @@
         "foregroundImage": "./assets/BOVO_logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.tupt.bovo"
+      "package": "com.tupt.bovo",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDbeRxVmUVGZoqB6aqIk8WggFh7wyzHo4k"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/BOVO_logo.png"
