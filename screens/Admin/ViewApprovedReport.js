@@ -1,17 +1,42 @@
-import { StyleSheet, Text, View, ScrollView, Image, Alert } from "react-native";
-import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  Alert,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
+import React, { useState, useMemo } from "react";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { Button, ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import Gallery from "react-native-awesome-gallery";
 
 const ViewApprovedReport = ({ route }) => {
   const { report } = route.params;
   const [confirmationImages, setConfirmationImages] = useState([]);
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
+  const [isConfirmationGalleryVisible, setIsConfirmationGalleryVisible] =
+    useState(false);
+  const [selectedConfirmationImageIndex, setSelectedConfirmationImageIndex] =
+    useState(0);
+  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const galleryImages = useMemo(() => {
+    return report.reportDetails
+      .flatMap((detail) => detail.images || [])
+      .map((img) => ({
+        uri: img.url,
+      }));
+  }, [report.reportDetails]);
 
   const selectImages = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -77,10 +102,10 @@ const ViewApprovedReport = ({ route }) => {
       });
       formData.append("status", "Resolved");
       formData.append("plateId", report._id);
-      
+
       if (report.reportDetails && report.reportDetails.length > 0) {
         report.reportDetails.forEach((detail) => {
-          formData.append("reportId", detail._id); 
+          formData.append("reportId", detail._id);
         });
       }
 
@@ -114,17 +139,91 @@ const ViewApprovedReport = ({ route }) => {
     }
   };
 
+  console.log("Gallery Images:", galleryImages.length);
+
   return (
     <ScrollView style={styles.container}>
       <Animated.Text entering={FadeInDown} style={styles.headerText}>
         Approved Report
       </Animated.Text>
       <Animated.View entering={FadeInUp} style={styles.reportCard}>
-        <Text style={styles.reportTitle}>Plate Number: {report.plateNumber}</Text>
+        <Text style={styles.reportTitle}>
+          Plate Number: {report.plateNumber}
+        </Text>
         <Text style={styles.reportDescription}>Count: {report.count}</Text>
         <Text style={styles.reportDescription}>
           Created At: {new Date(report.createdAt).toLocaleString()}
         </Text>
+
+        {galleryImages.length > 0 && (
+          <View style={{ marginBottom: 20 }}>
+            <Text style={styles.sectionHeader}>Report Images:</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 10 }}
+            >
+              {galleryImages.slice(0, 2).map((img, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => {
+                    setSelectedImageIndex(idx);
+                    setIsGalleryVisible(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      position: "relative",
+                      width: 150,
+                      height: 100,
+                      marginRight: 10,
+                      overflow: "hidden",
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Image
+                      source={{ uri: img.uri }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: 10,
+                      }}
+                      resizeMode="cover"
+                    />
+                    {idx === 1 && galleryImages.length > 2 && (
+                      <View style={styles.moreImagesOverlay}>
+                        <Text style={styles.moreImagesText}>
+                          +{galleryImages.length - 2}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {/* Modal for full-screen gallery */}
+            <Modal visible={isGalleryVisible} transparent={true}>
+              <View style={styles.galleryContainer}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setIsGalleryVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>X</Text>
+                </TouchableOpacity>
+                <Gallery
+                  data={galleryImages.map((img) => img.uri)}
+                  initialIndex={selectedImageIndex}
+                  onSwipeToClose={() => setIsGalleryVisible(false)}
+                  numToRender={5}
+                  emptySpaceWidth={20}
+                  doubleTapScale={2}
+                  maxScale={4}
+                  loop={true}
+                />
+              </View>
+            </Modal>
+          </View>
+        )}
 
         <Text style={styles.sectionHeader}>Violations:</Text>
         {report.violations.map((violation, index) => (
@@ -139,14 +238,12 @@ const ViewApprovedReport = ({ route }) => {
         {report.reportDetails.map((detail, index) => (
           <View key={index} style={styles.reportDetailItem}>
             <Text style={styles.reportDetailText}>
-              Description: {detail.description}
+              Description: {detail.original}
             </Text>
             <Text style={styles.reportDetailText}>
               Location: {detail.location}
             </Text>
-            <Text style={styles.reportDetailText}>
-              Status: {detail.status}
-            </Text>
+            <Text style={styles.reportDetailText}>Status: {detail.status}</Text>
             <Text style={styles.reportDetailText}>
               Created At: {new Date(detail.createdAt).toLocaleString()}
             </Text>
@@ -163,12 +260,37 @@ const ViewApprovedReport = ({ route }) => {
         {confirmationImages.length > 0 && (
           <View style={styles.imagesContainer}>
             {confirmationImages.map((image, index) => (
-              <Image
+              <TouchableOpacity
                 key={index}
-                source={{ uri: image.uri }}
-                style={styles.image}
-              />
+                onPress={() => {
+                  setSelectedConfirmationImageIndex(index);
+                  setIsConfirmationGalleryVisible(true);
+                }}
+              >
+                <Image source={{ uri: image.uri }} style={styles.image} />
+              </TouchableOpacity>
             ))}
+            {/* Modal for confirmation images gallery */}
+            <Modal visible={isConfirmationGalleryVisible} transparent={true}>
+              <View style={styles.galleryContainer}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setIsConfirmationGalleryVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>X</Text>
+                </TouchableOpacity>
+                <Gallery
+                  data={confirmationImages.map((img) => img.uri)}
+                  initialIndex={selectedConfirmationImageIndex}
+                  onSwipeToClose={() => setIsConfirmationGalleryVisible(false)}
+                  numToRender={5}
+                  emptySpaceWidth={20}
+                  doubleTapScale={2}
+                  maxScale={4}
+                  loop={true}
+                />
+              </View>
+            </Modal>
           </View>
         )}
         <Button
@@ -267,5 +389,69 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    maxWidth: "90%",
+    maxHeight: "80%",
+  },
+  modalImage: {
+    width: 300,
+    height: 300,
+    marginBottom: 20,
+  },
+  exitButton: {
+    backgroundColor: "#6200ee",
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  exitButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  galleryContainer: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+    padding: 10,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  moreImagesOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 150,
+    height: 100,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  moreImagesText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "bold",
   },
 });

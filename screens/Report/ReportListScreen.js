@@ -58,8 +58,8 @@ const ReportListScreen = () => {
       <Text style={styles.location}>{item.location}</Text>
       <Text style={styles.description}>
         {item.description.length > 50
-          ? `${item.description.substring(0, 50)}...`
-          : item.description}
+          ? `${item.original.substring(0, 50)}...`
+          : item.original}
       </Text>
     </TouchableOpacity>
   );
