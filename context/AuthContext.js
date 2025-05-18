@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post(`${BASE_URL}/user/register`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      await AsyncStorage.setItem("userToken", res.data.token)
+      await AsyncStorage.setItem("userToken", res.data.token);
       setIsLoading(false);
     } catch (error) {
       console.error("Error during sign up:", error.message);
@@ -161,13 +161,26 @@ export const AuthProvider = ({ children }) => {
   const isLoggedIn = async () => {
     try {
       setIsLoading(true);
-      let token = await AsyncStorage.getItem("userToken");
-      setUserToken(token);
+      // console.log("Checking if user is logged in...");
+      const { data } = await axios.get(`${BASE_URL}/user/profile`);
+      if (data.user) {
+        let token = await AsyncStorage.getItem("userToken");
+        setUserToken(token);
+      } else {
+        setUserToken(null);
+      }
       setIsLoading(false);
     } catch (e) {
       console.log(`isLogged in error ${e}`);
+      setUserToken(null);
+      await AsyncStorage.removeItem("userToken");
+      setIsLoading(false);
     }
   };
+
+  // setTimeout(() => {
+  //   isLoggedIn();
+  // }, 1500);
 
   useEffect(() => {
     isLoggedIn();
