@@ -67,7 +67,12 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={styles.drawerButton}
       >
-        <MaterialIcon name="announcement" size={20} color="#333" style={styles.icon} />
+        <MaterialIcon
+          name="announcement"
+          size={20}
+          color="#333"
+          style={styles.icon}
+        />
         <Text style={styles.drawerButtonText}>Announcements</Text>
       </TouchableOpacity>
 
@@ -77,7 +82,12 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={styles.drawerButton}
       >
-        <MaterialIcon name="announcement" size={20} color="#333" style={styles.icon} />
+        <MaterialIcon
+          name="announcement"
+          size={20}
+          color="#333"
+          style={styles.icon}
+        />
         <Text style={styles.drawerButtonText}>Street Map</Text>
       </TouchableOpacity>
 
@@ -134,7 +144,7 @@ const CustomDrawerContent = ({ navigation }) => {
       )}
 
       {/* Admin */}
-      {user && user.role === "admin" && (
+      {user && (user.role === "admin" || user.role === "superadmin") && (
         <>
           <TouchableOpacity
             onPress={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}

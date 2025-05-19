@@ -161,8 +161,9 @@ export const AuthProvider = ({ children }) => {
   const isLoggedIn = async () => {
     try {
       setIsLoading(true);
-      // console.log("Checking if user is logged in...");
+      console.log("Checking if user is logged in...");
       const { data } = await axios.get(`${BASE_URL}/user/profile`);
+      console.log("User data:", data);
       if (data.user) {
         let token = await AsyncStorage.getItem("userToken");
         setUserToken(token);
@@ -171,7 +172,7 @@ export const AuthProvider = ({ children }) => {
       }
       setIsLoading(false);
     } catch (e) {
-      console.log(`isLogged in error ${e}`);
+      console.log(`isLogged in error ${e.response.data.message}`);
       setUserToken(null);
       await AsyncStorage.removeItem("userToken");
       setIsLoading(false);
