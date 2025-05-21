@@ -16,14 +16,41 @@ export const AuthProvider = ({ children }) => {
     email: "",
     picture: "",
   });
+  const isLoggedIn = async () => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        setUserToken(null);
+        setIsLoading(false);
+        return;
+      }
+      axios.defaults.headers.common["Authorization"] = token;
+      const { data } = await axios.get(`${BASE_URL}/user/profile`);
+      if (data.user) {
+        setUserToken(token);
+      } else {
+        setUserToken(null);
+        await AsyncStorage.removeItem("userToken");
+      }
+      setIsLoading(false);
+    } catch (e) {
+      console.log(
+        `isLogged in error ${e?.response?.data?.message || e.message}`
+      );
+      setUserToken(null);
+      await AsyncStorage.removeItem("userToken");
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
+    isLoggedIn();
     GoogleSignin.configure({
       webClientId:
         "642593357289-i58a7qjhh4fiooamvo54ubclik39eqbf.apps.googleusercontent.com",
       offlineAccess: true,
     });
-    axios.defaults.headers.common["Authorization"] = userToken;
   }, [userToken]);
 
   const login = (email, password) => {
@@ -125,6 +152,7 @@ export const AuthProvider = ({ children }) => {
             );
           })
           .catch((error) => {
+            GoogleSignin.signOut();
             console.log("Google login error:", error);
           })
           .finally(() => {
@@ -132,6 +160,7 @@ export const AuthProvider = ({ children }) => {
           });
       })
       .catch((e) => {
+        GoogleSignin.signOut();
         console.log(e);
       });
   };
@@ -158,34 +187,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const isLoggedIn = async () => {
-    try {
-      setIsLoading(true);
-      console.log("Checking if user is logged in...");
-      const { data } = await axios.get(`${BASE_URL}/user/profile`);
-      console.log("User data:", data);
-      if (data.user) {
-        let token = await AsyncStorage.getItem("userToken");
-        setUserToken(token);
-      } else {
-        setUserToken(null);
-      }
-      setIsLoading(false);
-    } catch (e) {
-      console.log(`isLogged in error ${e.response.data.message}`);
-      setUserToken(null);
-      await AsyncStorage.removeItem("userToken");
-      setIsLoading(false);
-    }
-  };
-
   // setTimeout(() => {
   //   isLoggedIn();
   // }, 1500);
-
-  useEffect(() => {
-    isLoggedIn();
-  }, []);
 
   return (
     <AuthContext.Provider
