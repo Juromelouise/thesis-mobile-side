@@ -13,6 +13,7 @@ import {
 import axios from "axios";
 import { BASE_URL } from "../assets/common/config";
 import Gallery from "react-native-awesome-gallery";
+import { filterText } from "../utils/filterText";
 
 const ViewReportScreen = ({ route }) => {
   const { id } = route.params;
@@ -22,6 +23,7 @@ const ViewReportScreen = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [role, setRole] = useState("user"); 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,6 +31,8 @@ const ViewReportScreen = ({ route }) => {
         const response = await axios.get(
           `${BASE_URL}/report/admin/report/${id}`
         );
+        const { data } = await axios.get(`${BASE_URL}/user/profile`);
+       setRole(data.user.role);
         setData(response.data.report);
         setComments(response.data.report.comment || []);
       } catch (error) {
@@ -41,18 +45,10 @@ const ViewReportScreen = ({ route }) => {
     fetchData();
   }, [id]);
 
-  console.log(
-    data?.images
-      ?.filter((image) => image?.url) // Filter out invalid entries
-      ?.map((image) => ({
-        uri: image.url, // Map the `url` property to `uri`
-      }))
-  );
-
   const handleAddComment = async () => {
     try {
       const response = await axios.post(`${BASE_URL}/comment/${id}/comment`, {
-        content: newComment,
+        text: newComment,
       });
       setComments((prevComments) => [...prevComments, response.data]);
       setNewComment("");
@@ -117,7 +113,10 @@ const ViewReportScreen = ({ route }) => {
                   {comment.user?.firstName + " " + comment.user?.lastName ||
                     "Anonymous"}
                 </Text>
-                <Text style={styles.commentContent}>{comment.content}</Text>
+                <Text style={styles.commentContent}>
+                  {/* Filter text for users, don't filter for admin/superadmin */}
+                  {filterText(comment.content, role)}
+                </Text>
                 <Text style={styles.commentDate}>
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </Text>
@@ -161,15 +160,15 @@ const ViewReportScreen = ({ route }) => {
             {/* Gallery Component */}
             <Gallery
               data={data?.images
-                ?.filter((image) => typeof image?.url === "string") 
-                ?.map((image) => image.url)} 
+                ?.filter((image) => typeof image?.url === "string")
+                ?.map((image) => image.url)}
               initialIndex={selectedImageIndex}
               onSwipeToClose={() => setIsGalleryVisible(false)}
-              numToRender={5} 
+              numToRender={5}
               emptySpaceWidth={20}
               doubleTapScale={2}
               maxScale={4}
-              loop={true} 
+              loop={true}
             />
           </View>
         </Modal>
