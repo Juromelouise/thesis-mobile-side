@@ -31,7 +31,6 @@ export default function ReportScreen() {
   const [addressError, setAddressError] = useState("");
   const [plateError, setPlateError] = useState("");
   const [imagesError, setImagesError] = useState("");
-  const [postIt, setPostIt] = useState(false);
   const [geocode, setGeocode] = useState(null);
 
   const navigation = useNavigation();
@@ -217,10 +216,10 @@ export default function ReportScreen() {
       await axios.post(`${BASE_URL}/report/post/report`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setAddress("");
-      setDescription("");
-      setPlate("");
-      setImages([]);
+      // setAddress("");
+      // setDescription("");
+      // setPlate("");
+      // setImages([]);
       setDescriptionError("");
       setAddressError("");
       setPlateError("");

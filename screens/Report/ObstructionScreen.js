@@ -27,6 +27,7 @@ const ObstructionScreen = () => {
   const [descriptionError, setDescriptionError] = useState("");
   const [addressError, setAddressError] = useState("");
   const [imagesError, setImagesError] = useState("");
+  const [geocode, setGeocode] = useState(null);
 
   const navigation = useNavigation();
 
@@ -57,6 +58,11 @@ const ObstructionScreen = () => {
 
       let loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
+      });
+
+       setGeocode({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
       });
 
       const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -94,6 +100,7 @@ const ObstructionScreen = () => {
     image = await setImageUpload(images);
     formData.append("description", description);
     formData.append("location", address);
+    formData.append("geocodeData", JSON.stringify(geocode));
     image.map((imag) => {
       formData.append("images", imag);
     });
