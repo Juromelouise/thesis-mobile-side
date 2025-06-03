@@ -3,8 +3,11 @@ import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
 import { BASE_URL } from "../assets/common/config";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import auth from "@react-native-firebase/auth";
-
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from "@react-native-firebase/auth";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -16,6 +19,7 @@ export const AuthProvider = ({ children }) => {
     email: "",
     picture: "",
   });
+  
   const isLoggedIn = async () => {
     try {
       setIsLoading(true);
@@ -65,7 +69,7 @@ export const AuthProvider = ({ children }) => {
         AsyncStorage.setItem("userToken", res.data.token);
       })
       .catch((e) => {
-        console.log(`Login error ${e}`);
+        console.error(`Login error ${e}`);
       })
       .finally(() => {
         setIsLoading(false);
@@ -127,13 +131,13 @@ export const AuthProvider = ({ children }) => {
       .then(() => {
         GoogleSignin.signIn()
           .then(({ data }) => {
-            const googleCredential = auth.GoogleAuthProvider.credential(
+            const googleCredential = GoogleAuthProvider.credential(
               data.idToken
             );
+            const authInstance = getAuth();
 
-            return auth()
-              .signInWithCredential(googleCredential)
-              .then((userCredential) => {
+            return signInWithCredential(authInstance, googleCredential).then(
+              (userCredential) => {
                 const user = {
                   given_name: data.user.givenName,
                   family_name: data.user.familyName,
@@ -142,7 +146,8 @@ export const AuthProvider = ({ children }) => {
                 };
                 setUserData(user);
                 return axios.post(`${BASE_URL}/auth/mobile/auth`, user);
-              });
+              }
+            );
           })
           .then((response) => {
             return AsyncStorage.setItem("userToken", response.data.token).then(
@@ -153,7 +158,16 @@ export const AuthProvider = ({ children }) => {
           })
           .catch((error) => {
             GoogleSignin.signOut();
-            console.log("Google login error:", error);
+            if (error.response) {
+              console.log("Google login error:", error.response.data);
+            } else if (error.request) {
+              console.log(
+                "Google login error: No response received",
+                error.request
+              );
+            } else {
+              console.log("Google login error:", error.message);
+            }
           })
           .finally(() => {
             setIsLoading(false);
