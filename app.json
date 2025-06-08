@@ -1,13 +1,27 @@
 {
   "expo": {
     "name": "BOVO",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "slug": "BOVO",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "version": "1.0.0",
     "plugins": [
-      ["@react-native-google-signin/google-signin"],
-      ["expo-notifications", { "icon": "./assets/BOVO_logo.png" }]
+      [
+        "@react-native-google-signin/google-signin"
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/BOVO_logo.png"
+        }
+      ],
+      "expo-asset"
     ],
     "orientation": "portrait",
     "icon": "./assets/BOVO_logo.png",

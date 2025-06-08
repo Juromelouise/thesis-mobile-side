@@ -1,11 +1,51 @@
-import React from "react";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import React, { useEffect, useState } from "react";
+import MapView, { PROVIDER_GOOGLE, Polygon } from "react-native-maps";
 import { StyleSheet, View } from "react-native";
+import geojson from "../../assets/export.json"; // <-- Import as JSON
 
 export default function StreetScreen() {
+  const [polygonCoords, setPolygonCoords] = useState([]);
+
+useEffect(() => {
+    // Use the first feature (Western Bicutan)
+    const feature = geojson.features[0];
+    if (
+      feature &&
+      feature.geometry &&
+      feature.geometry.type === "Polygon" &&
+      feature.geometry.coordinates.length > 0
+    ) {
+      const coords = feature.geometry.coordinates[0].map(([lng, lat]) => ({
+        latitude: lat,
+        longitude: lng,
+      }));
+      setPolygonCoords(coords);
+    }
+  }, []);
+  // Center the map on Western Bicutan (adjust as needed)
+  const initialRegion = {
+    latitude: 14.5172,
+    longitude: 121.0364,
+    latitudeDelta: 0.03,
+    longitudeDelta: 0.03,
+  };
+
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} provider={PROVIDER_GOOGLE} />
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={initialRegion}
+      >
+        {polygonCoords.length > 0 && (
+          <Polygon
+            coordinates={polygonCoords}
+            strokeColor="#6e44ff"
+            fillColor="rgba(110,68,255,0.1)"
+            strokeWidth={3}
+          />
+        )}
+      </MapView>
     </View>
   );
 }
