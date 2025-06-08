@@ -1,4 +1,4 @@
-export const validateReportForm = (description, address, plate, images) => {
+export const validateReportForm = (description, address, images) => {
   let valid = true;
   let errors = {
     descriptionError: "",
@@ -17,10 +17,10 @@ export const validateReportForm = (description, address, plate, images) => {
     valid = false;
   }
 
-  if (!plate) {
-    errors.plateError = "Plate number is required";
-    valid = false;
-  }
+  // if (!plate) {
+  //   errors.plateError = "Plate number is required";
+  //   valid = false;
+  // }
 
   if (images.length !== 3) {
     errors.imagesError = "Exactly three images are required";

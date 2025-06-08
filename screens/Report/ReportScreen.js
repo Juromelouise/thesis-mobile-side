@@ -171,12 +171,7 @@ export default function ReportScreen() {
       console.error("Error on Fetching Data:", error);
       navigation.navigate("ReportScreen");
     }
-    const { valid, errors } = validateReportForm(
-      description,
-      address,
-      plate,
-      images
-    );
+    const { valid, errors } = validateReportForm(description, address, images);
     setDescriptionError(errors.descriptionError);
     setAddressError(errors.addressError);
     setPlateError(errors.plateError);
@@ -288,22 +283,62 @@ export default function ReportScreen() {
           </View>
           {imagesError && <Text style={styles.errorText}>{imagesError}</Text>}
 
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="Plate Number"
-              placeholderTextColor="#aaa"
-              value={plate}
-              onChangeText={setPlate}
-            />
+          {!plate ? (
             <TouchableOpacity
-              style={styles.cameraButton}
+              style={[
+                styles.cameraButton,
+                {
+                  alignSelf: "flex-start",
+                  marginBottom: 20,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#6e44ff",
+                  paddingHorizontal: 16,
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                },
+              ]}
               onPress={pickImageAndUpload}
             >
-              <Ionicons name="camera" size={24} color="#000" />
+              <Ionicons name="camera" size={24} color="#fff" />
+              <Text
+                style={{ color: "#fff", marginLeft: 8, fontWeight: "bold" }}
+              >
+                Add Plate Number
+              </Text>
             </TouchableOpacity>
-          </View>
-          {plateError && <Text style={styles.errorText}>{plateError}</Text>}
+          ) : (
+            <View
+              style={[
+                styles.inputRow,
+                { marginBottom: 20, alignItems: "center" },
+              ]}
+            >
+              <TextInput
+                style={[
+                  styles.input,
+                  { flex: 1, marginRight: 10, backgroundColor: "#f5f5f5" },
+                ]}
+                placeholder="Plate Number"
+                placeholderTextColor="#aaa"
+                value={plate}
+                onChangeText={setPlate}
+              />
+              <TouchableOpacity
+                style={[
+                  styles.cameraButton,
+                  {
+                    backgroundColor: "#6e44ff",
+                    padding: 10,
+                    borderRadius: 10,
+                  },
+                ]}
+                onPress={pickImageAndUpload}
+              >
+                <Ionicons name="camera" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View style={styles.inputRow}>
             <TextInput
