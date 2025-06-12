@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import MapView, { PROVIDER_GOOGLE, Polygon } from "react-native-maps";
 import { StyleSheet, View } from "react-native";
-import geojson from "../../assets/export.json"; // <-- Import as JSON
-
+import geojson from "../../assets/export.json";
 export default function StreetScreen() {
   const [polygonCoords, setPolygonCoords] = useState([]);
 
 useEffect(() => {
-    // Use the first feature (Western Bicutan)
     const feature = geojson.features[0];
     if (
       feature &&
@@ -22,7 +20,6 @@ useEffect(() => {
       setPolygonCoords(coords);
     }
   }, []);
-  // Center the map on Western Bicutan (adjust as needed)
   const initialRegion = {
     latitude: 14.5172,
     longitude: 121.0364,
