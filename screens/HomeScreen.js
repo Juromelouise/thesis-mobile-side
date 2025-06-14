@@ -14,61 +14,71 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { BASE_URL } from "../assets/common/config";
+import LottieView from "lottie-react-native";
 
-const ReportCard = ({ createdAt, location, images, description, navigation, id }) => {
+const ReportCard = ({
+  createdAt,
+  location,
+  images,
+  description,
+  navigation,
+  id,
+}) => {
   return (
-    <TouchableOpacity onPress={() => navigation.navigate("ViewReportScreen", { id })}>
-    <View style={styles.card}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        {/* Left Section: User Info */}
-        <View style={styles.leftSection}>
-          <View style={styles.userInfo}>
-            <MaterialCommunityIcons
-              name="account-circle"
-              size={40}
-              color="#555"
-              style={styles.avatar}
-            />
-            <View>
-              <Text style={styles.username}>Anonymous</Text>
-              <Text style={styles.date}>{createdAt?.split("T")[0]}</Text>
+    <TouchableOpacity
+      onPress={() => navigation.navigate("ViewReportScreen", { id })}
+    >
+      <View style={styles.card}>
+        {/* Header Section */}
+        <View style={styles.header}>
+          {/* Left Section: User Info */}
+          <View style={styles.leftSection}>
+            <View style={styles.userInfo}>
+              <MaterialCommunityIcons
+                name="account-circle"
+                size={40}
+                color="#555"
+                style={styles.avatar}
+              />
+              <View>
+                <Text style={styles.username}>Anonymous</Text>
+                <Text style={styles.date}>{createdAt?.split("T")[0]}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Divider */}
-        <View style={styles.divider} />
+          {/* Divider */}
+          <View style={styles.divider} />
 
-        {/* Right Section: Location */}
-        <View style={styles.rightSection}>
-          <Text style={styles.location}>{location}</Text>
-        </View>
-      </View>
-
-      {/* Image Boxes */}
-      <View style={styles.imageContainer}>
-        {images.slice(0, 2).map((image, index) => (
-          <Image
-            key={index}
-            source={{ uri: image.url }}
-            style={styles.imageBox}
-          />
-        ))}
-        {images.length > 2 && (
-          <View style={styles.overlay}>
-            <Text style={styles.plusText}>+{images.length - 2}</Text>
+          {/* Right Section: Location */}
+          <View style={styles.rightSection}>
+            <Text style={styles.location}>{location}</Text>
           </View>
-        )}
-      </View>
+        </View>
 
-      {/* Description Box */}
-      <View style={styles.descriptionBox}>
-        <ScrollView>
-          <Text style={styles.description}>{description}</Text>
-        </ScrollView>
+        {/* Image Boxes */}
+        <View style={styles.imageContainer}>
+          {images.slice(0, 2).map((image, index) => (
+            <Image
+              key={index}
+              source={{ uri: image.url }}
+              style={styles.imageBox}
+            />
+          ))}
+          {images.length > 2 && (
+            <View style={styles.overlay}>
+              <Text style={styles.plusText}>+{images.length - 2}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Description Box */}
+        <View style={styles.descriptionBox}>
+          <ScrollView>
+            <Text style={styles.description}>{description}</Text>
+          </ScrollView>
+        </View>
       </View>
-    </View>
     </TouchableOpacity>
   );
 };
@@ -98,6 +108,30 @@ const HomeScreen = () => {
     setRefreshing(true);
     getData().then(() => setRefreshing(false));
   }, []);
+
+  if (!data || data.length === 0) {
+    return (
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { flex: 1, justifyContent: "center", alignItems: "center" },
+        ]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <LottieView
+          source={require("../assets/nodata.json")}
+          autoPlay
+          loop
+          style={{ width: 250, height: 250 }}
+        />
+        <Text style={{ marginTop: 20, fontSize: 18, color: "#888" }}>
+          No Data Available
+        </Text>
+      </ScrollView>
+    );
+  }
 
   return (
     <FlatList

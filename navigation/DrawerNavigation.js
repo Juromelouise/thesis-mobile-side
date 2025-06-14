@@ -82,12 +82,7 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={styles.drawerButton}
       >
-        <MaterialIcon
-          name="announcement"
-          size={20}
-          color="#333"
-          style={styles.icon}
-        />
+        <Icon name="map" size={20} color="#333" style={styles.icon} />
         <Text style={styles.drawerButtonText}>Street Map</Text>
       </TouchableOpacity>
 
@@ -98,11 +93,26 @@ const CustomDrawerContent = ({ navigation }) => {
         style={styles.drawerButton}
       >
         <Icon name="th-list" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>List of Report</Text>
+        <Text style={styles.drawerButtonText}>List of Reports</Text>
       </TouchableOpacity>
 
       {/* Report */}
       <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Illegal Parking");
+        }}
+        style={styles.drawerButton}
+      >
+        <Icon
+          name="file"
+          size={20}
+          color="#333"
+          style={styles.icon}
+        />
+        <Text style={styles.drawerButtonText}>Submit a Report</Text>
+      </TouchableOpacity>
+
+      {/* <TouchableOpacity
         onPress={() => setIsReportDropdownOpen(!isReportDropdownOpen)}
         style={styles.drawerButton}
       >
@@ -114,10 +124,10 @@ const CustomDrawerContent = ({ navigation }) => {
           color="#333"
           style={styles.dropdownIcon}
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Dropdown for Report options */}
-      {isReportDropdownOpen && (
+      {/* {isReportDropdownOpen && (
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -141,7 +151,7 @@ const CustomDrawerContent = ({ navigation }) => {
             <Text style={styles.dropdownButtonText}>Report Obstruction</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
 
       {/* Admin */}
       {user && (user.role === "admin" || user.role === "superadmin") && (

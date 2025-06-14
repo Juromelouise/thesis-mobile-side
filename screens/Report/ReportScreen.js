@@ -359,7 +359,7 @@ export default function ReportScreen() {
 
           <TextInput
             style={[styles.input, styles.reasonInput]}
-            placeholder="Reason"
+            placeholder="Complaint"
             placeholderTextColor="#aaa"
             multiline
             value={description}
