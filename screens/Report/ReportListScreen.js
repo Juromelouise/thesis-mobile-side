@@ -20,9 +20,9 @@ const ReportListScreen = () => {
     try {
       const { data } = await axios.get(`${BASE_URL}/report/fetch/all`);
       if (filter === "illegal_parking") {
-        setReportData(data.data.filter(item => item.plateNumber === true));
+        setReportData(data.data.filter((item) => item.plateNumber === true));
       } else if (filter === "obstruction") {
-        setReportData(data.data.filter(item => item.plateNumber === false));
+        setReportData(data.data.filter((item) => item.plateNumber === false));
       } else {
         setReportData(data.data);
       }
@@ -41,7 +41,6 @@ const ReportListScreen = () => {
   );
 
   const handlePress = (report, plateNumber) => {
-    console.log(plateNumber);
     if (plateNumber === true) {
       navigation.navigate("DetailReportScreen", { report });
     } else {

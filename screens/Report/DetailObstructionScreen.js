@@ -29,6 +29,7 @@ const DetailObstructionScreen = ({ route }) => {
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const [confirmationImages, setConfirmationImages] = useState([]);
+  const [status, setStatus] = useState("");
   // const [reportData, setReportData] = useState({});
   const navigate = useNavigation();
 
@@ -40,17 +41,23 @@ const DetailObstructionScreen = ({ route }) => {
     const id = route.params.report
     try {
       const { data } = await axios.get(`${BASE_URL}/report/admin/obstruction/${id}`);
-      console.log(data.data.original);
       setData(data);
       setDescription(data.data.original || "");
       setAddress(data.data.location || "");
       setConfirmationImages(data.data.confirmationImages || []);
       setData(data.data);
+      console.log("Data fetched:", data.data);
+      if (data.data.status === "Pending") {
+        setStatus("Submitted");
+      }else {
+        setStatus(data.data.status);
+      }
     } catch (e) {
       console.log(e);
       navigate.navigate("Home");
     }
   };
+
 
   const pickImage = async () => {
     if (images.length >= 4) {
@@ -243,7 +250,7 @@ const DetailObstructionScreen = ({ route }) => {
           </View>
           <View style={styles.inputRow}>
             <Text style={styles.label}>Status:</Text>
-            <Text style={styles.input}>{data.status}</Text>
+            <Text style={styles.input}>{status}</Text>
           </View>
           {data && data.status === "Pending" && (
             <>
