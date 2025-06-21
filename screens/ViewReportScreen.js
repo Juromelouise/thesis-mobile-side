@@ -82,7 +82,7 @@ const ViewReportScreen = ({ route }) => {
     <ScrollView contentContainerStyle={styles.container}>
       {/* Report Details */}
       <View style={styles.card}>
-        <Text style={styles.title}>{data.description}</Text>
+        <Text style={styles.title}>{data.original}</Text>
         <Text style={styles.location}>
           <Text style={styles.label}>Location:</Text> {data.location}
         </Text>
