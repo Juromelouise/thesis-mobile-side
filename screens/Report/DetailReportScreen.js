@@ -148,6 +148,8 @@ const DetailReportScreen = ({ route }) => {
     }
   };
 
+  console.log("Report ID:", data);
+
   const deleteReport = async (id) => {
     Alert.alert(
       "Confirm Delete",
@@ -328,19 +330,28 @@ const DetailReportScreen = ({ route }) => {
           <Modal
             visible={visible}
             onDismiss={hideModal}
-            contentContainerStyle={[containerStyle, { maxHeight: "80%" }]} // Set a maximum height
+            contentContainerStyle={[containerStyle, { maxHeight: "80%" }]}
           >
             <ScrollView contentContainerStyle={{ paddingVertical: 10 }}>
               <View style={styles.reportSection}>
                 <Text style={styles.reportText}>Update Report</Text>
 
                 {/* Display Images Dynamically */}
-                <View style={styles.imagesContainer}>
+                <View style={[styles.imagesContainer, { minHeight: 160 }]}>
                   {images.length > 0 ? (
                     images.map((imageUri, index) => (
                       <Image
                         key={index}
                         source={{ uri: imageUri }}
+                        style={styles.modalImage}
+                        resizeMode="cover"
+                      />
+                    ))
+                  ) : data.images && data.images.length > 0 ? (
+                    data.images.map((img, index) => (
+                      <Image
+                        key={index}
+                        source={{ uri: img.url }}
                         style={styles.modalImage}
                         resizeMode="cover"
                       />

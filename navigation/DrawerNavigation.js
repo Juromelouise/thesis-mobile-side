@@ -7,7 +7,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../context/AuthContext";
 import Navigator from "./Navigator";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView} from "react-native";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { BASE_URL } from "../assets/common/config";
@@ -36,8 +36,17 @@ const CustomDrawerContent = ({ navigation }) => {
   return (
     <View style={styles.drawerContainer}>
       <View style={styles.drawerHeader}>
-        <Text style={styles.headerText}>Menu</Text>
+        <Image
+          source={require("../assets/BOVO_logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.logoText}>BOVO</Text>
       </View>
+       <ScrollView
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
 
       {/* Home */}
       <TouchableOpacity
@@ -103,12 +112,7 @@ const CustomDrawerContent = ({ navigation }) => {
         }}
         style={styles.drawerButton}
       >
-        <Icon
-          name="file"
-          size={20}
-          color="#333"
-          style={styles.icon}
-        />
+        <Icon name="file" size={20} color="#333" style={styles.icon} />
         <Text style={styles.drawerButtonText}>Submit a Report</Text>
       </TouchableOpacity>
 
@@ -154,7 +158,16 @@ const CustomDrawerContent = ({ navigation }) => {
       )} */}
 
       {/* Admin */}
-      {user && (user.role === "admin" || user.role === "superadmin") && (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Approve Reports");
+        }}
+        style={styles.drawerButton}
+      >
+        <MaterialIcons name="admin-panel-settings" size={20} color="#333" style={styles.icon} />
+        <Text style={styles.drawerButtonText}>Admin</Text>
+      </TouchableOpacity>
+      {/* {user && (user.role === "admin" || user.role === "superadmin") && (
         <>
           <TouchableOpacity
             onPress={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}
@@ -175,10 +188,10 @@ const CustomDrawerContent = ({ navigation }) => {
             />
           </TouchableOpacity>
         </>
-      )}
+      )} */}
 
       {/* Dropdown for Admin options */}
-      {isAdminDropdownOpen && (
+      {/* {isAdminDropdownOpen && (
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -199,7 +212,7 @@ const CustomDrawerContent = ({ navigation }) => {
             <Text style={styles.dropdownButtonText}>Approve Obstructions</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
 
       {/* Logout */}
       <TouchableOpacity
@@ -213,6 +226,7 @@ const CustomDrawerContent = ({ navigation }) => {
           Logout
         </Text>
       </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
@@ -295,6 +309,17 @@ const styles = StyleSheet.create({
   drawerHeader: {
     marginBottom: 40,
     alignItems: "center",
+  },
+  logo: {
+    width: 90,
+    height: 90,
+    marginBottom: 8,
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000000",
+    letterSpacing: 2,
   },
   headerText: {
     fontSize: 24,

@@ -5,15 +5,16 @@ import { BASE_URL } from "../assets/common/config";
 import { useFocusEffect } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native";
+import { ScrollView, RefreshControl } from "react-native";
+import LottieView from "lottie-react-native";
 
 const AnnouncementsScreen = () => {
   const [announcements, setAnnouncements] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false); // Add this
   const navigation = useNavigation();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchAnnouncements = async () => {
+   const fetchAnnouncements = async () => {
         try {
           const response = await axios.get(`${BASE_URL}/announce/show`);
           setAnnouncements(response.data.announcement);
@@ -24,9 +25,16 @@ const AnnouncementsScreen = () => {
         }
       };
 
+  useFocusEffect(
+    React.useCallback(() => {
       fetchAnnouncements();
     }, [])
   );
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchAnnouncements().then(() => setRefreshing(false));
+  }, []);
 
   const truncateText = (text, maxLength) => {
     if (text.length > maxLength) {
@@ -36,21 +44,23 @@ const AnnouncementsScreen = () => {
   };
 
   const renderAnnouncement = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate("ViewAnnouncementScreen", { item })}>
-    <View style={styles.announcementCard}>
-      {item.picture && item.picture.length > 0 && (
-        <Image
-          source={{ uri: item.picture[0].url }}
-          style={styles.announcementImage}
-        />
-      )}
-      <View style={styles.announcementContent}>
-        <Text style={styles.announcementTitle}>{item.title}</Text>
-        <Text style={styles.announcementDescription}>
-          {truncateText(item.description, 120)}
-        </Text>
+    <TouchableOpacity
+      onPress={() => navigation.navigate("ViewAnnouncementScreen", { item })}
+    >
+      <View style={styles.announcementCard}>
+        {item.picture && item.picture.length > 0 && (
+          <Image
+            source={{ uri: item.picture[0].url }}
+            style={styles.announcementImage}
+          />
+        )}
+        <View style={styles.announcementContent}>
+          <Text style={styles.announcementTitle}>{item.title}</Text>
+          <Text style={styles.announcementDescription}>
+            {truncateText(item.description, 120)}
+          </Text>
+        </View>
       </View>
-    </View>
     </TouchableOpacity>
   );
 
@@ -59,6 +69,30 @@ const AnnouncementsScreen = () => {
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading announcements...</Text>
       </View>
+    );
+  }
+
+  if (!announcements || announcements.length === 0) {
+    return (
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { flex: 1, justifyContent: "center", alignItems: "center" },
+        ]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <LottieView
+          source={require("../assets/nodata.json")}
+          autoPlay
+          loop
+          style={{ width: 250, height: 250 }}
+        />
+        <Text style={{ marginTop: 20, fontSize: 18, color: "#888" }}>
+          No Data Available
+        </Text>
+      </ScrollView>
     );
   }
 

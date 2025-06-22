@@ -27,56 +27,45 @@ const ReportCard = ({
   return (
     <TouchableOpacity
       onPress={() => navigation.navigate("ViewReportScreen", { id })}
+      activeOpacity={0.9}
     >
       <View style={styles.card}>
         {/* Header Section */}
         <View style={styles.header}>
-          {/* Left Section: User Info */}
-          <View style={styles.leftSection}>
-            <View style={styles.userInfo}>
-              <MaterialCommunityIcons
-                name="account-circle"
-                size={40}
-                color="#555"
-                style={styles.avatar}
-              />
-              <View>
-                <Text style={styles.username}>Anonymous</Text>
-                <Text style={styles.date}>{createdAt?.split("T")[0]}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.divider} />
-
-          {/* Right Section: Location */}
-          <View style={styles.rightSection}>
-            <Text style={styles.location}>{location}</Text>
-          </View>
-        </View>
-
-        {/* Image Boxes */}
-        <View style={styles.imageContainer}>
-          {images.slice(0, 2).map((image, index) => (
-            <Image
-              key={index}
-              source={{ uri: image.url }}
-              style={styles.imageBox}
+          <View style={styles.userInfo}>
+            <MaterialCommunityIcons
+              name="account-circle"
+              size={40}
+              color="#1877f2"
+              style={styles.avatar}
             />
-          ))}
-          {images.length > 2 && (
-            <View style={styles.overlay}>
-              <Text style={styles.plusText}>+{images.length - 2}</Text>
+            <View>
+              <Text style={styles.username}>Anonymous</Text>
+              <Text style={styles.date}>{createdAt?.split("T")[0]}</Text>
+              <Text style={styles.location}>{location}</Text>
             </View>
-          )}
+          </View>
         </View>
 
-        {/* Description Box */}
+        {/* Image Section */}
+        {images.length > 0 && (
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: images[0].url }}
+              style={styles.mainImage}
+              resizeMode="cover"
+            />
+            {images.length > 1 && (
+              <View style={styles.overlay}>
+                <Text style={styles.plusText}>+{images.length - 1}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Description */}
         <View style={styles.descriptionBox}>
-          <ScrollView>
-            <Text style={styles.description}>{description}</Text>
-          </ScrollView>
+          <Text style={styles.descriptionBold}>{description}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -159,29 +148,29 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    backgroundColor: "#f5f5f5",
+    paddingVertical: 16, // Increased vertical padding
+    backgroundColor: "#f0f2f5",
+    minHeight: "100%",
   },
   card: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 20,
+    marginHorizontal: 16, // Increased horizontal margin
+    marginBottom: 20,     // Increased bottom margin
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+    overflow: "hidden",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-  },
-  leftSection: {
-    flex: 1, // Equal space for left section
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  rightSection: {
-    flex: 1, // Equal space for right section
-    justifyContent: "center",
-    alignItems: "flex-end",
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 6,
+    // Removed justifyContent: "space-between" for left alignment
   },
   userInfo: {
     flexDirection: "row",
@@ -192,57 +181,58 @@ const styles = StyleSheet.create({
   },
   username: {
     fontWeight: "bold",
-    fontSize: 14,
+    fontSize: 15,
+    color: "#050505",
   },
   date: {
     fontSize: 12,
-    color: "#555",
+    color: "#65676b",
   },
   location: {
     fontSize: 12,
-    color: "#777",
-  },
-  divider: {
-    width: 1,
-    height: "80%",
-    backgroundColor: "#ccc",
-    alignSelf: "center",
+    color: "#65676b",
   },
   imageContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
+    width: "100%",
+    aspectRatio: 1.7, // Less tall image
+    backgroundColor: "#eee",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    padding: 8, // Added padding around the image
   },
-  imageBox: {
-    width: "48%",
-    height: 200,
-    borderRadius: 5,
-    backgroundColor: "#ccc",
+  mainImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 6,
   },
   overlay: {
     position: "absolute",
-    top: 0,
-    right: "0%",
-    width: "48%",
-    height: 200,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 5,
+    right: 20,
+    bottom: 20,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   plusText: {
     color: "#fff",
-    fontSize: 18,
     fontWeight: "bold",
+    fontSize: 16,
   },
   descriptionBox: {
-    backgroundColor: "#d1b295",
-    borderRadius: 5,
-    padding: 15,
-    height: 120,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   description: {
-    fontSize: 14,
-    color: "#333",
+    fontSize: 15,
+    color: "#050505",
+    lineHeight: 20,
+  },
+  descriptionBold: {
+    fontSize: 15,
+    color: "#050505",
+    lineHeight: 20,
+    fontWeight: "bold",
   },
 });
