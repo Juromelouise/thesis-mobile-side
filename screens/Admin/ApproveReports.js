@@ -41,6 +41,8 @@ const ApproveReports = () => {
     fetchData().then(() => setRefreshing(false));
   }, []);
 
+  const isPlateNumberReport = (item) => !!item.plateNumber;
+
   return (
     <ScrollView
       style={styles.container}
@@ -53,8 +55,12 @@ const ApproveReports = () => {
       </Animated.Text>
       {data.map((report, index) => (
         <TouchableOpacity
-          key={index}
-          onPress={() => navigation.navigate("ViewApprovedReport", { report })}
+          key={report._id || index}
+          onPress={() =>
+            isPlateNumberReport(report)
+              ? navigation.navigate("ViewApprovedReport", { report })
+              : navigation.navigate("ViewApprovedObstruction", { report })
+          }
         >
           <Animated.View
             entering={FadeInUp.delay(index * 100)}
@@ -62,11 +68,29 @@ const ApproveReports = () => {
           >
             <Card style={styles.card}>
               <Card.Content>
-                <Title style={styles.reportTitle}>{report?.plateNumber}</Title>
-                <Paragraph style={styles.reportDescription}>
-                  Violations:{" "}
-                  {report?.violations.map((v) => v.types.join(", ")).join("; ")}
-                </Paragraph>
+                {isPlateNumberReport(report) ? (
+                  <>
+                    <Title style={styles.reportTitle}>
+                      {report.plateNumber}
+                    </Title>
+                    <Paragraph style={styles.reportDescription}>
+                      Violations:{" "}
+                      {report.violations
+                        .map((v) => v.types.join(", "))
+                        .join("; ")}
+                    </Paragraph>
+                  </>
+                ) : (
+                  <>
+                    <Title style={styles.reportTitle}>Complaint</Title>
+                    <Paragraph style={styles.reportDescription}>
+                      Location: {report.location}
+                    </Paragraph>
+                    <Paragraph style={styles.reportDescription}>
+                      Description: {report.description}
+                    </Paragraph>
+                  </>
+                )}
               </Card.Content>
             </Card>
           </Animated.View>

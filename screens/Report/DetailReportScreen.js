@@ -49,8 +49,6 @@ const DetailReportScreen = ({ route }) => {
       setPlate(data.report.plateNumber?.plateNumber || "");
       setConfirmationImages(data?.report?.confirmationImages || []);
 
-      console.log("Report Data:", data.report.plateNumber.violations);
-
       if (
         data.report.plateNumber &&
         Array.isArray(data.report.plateNumber.violations)
@@ -63,6 +61,7 @@ const DetailReportScreen = ({ route }) => {
       }
     } catch (e) {
       console.error(e);
+      navigate.navigate("Home");
     }
   };
 

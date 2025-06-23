@@ -4,39 +4,43 @@ import {
   View,
   ScrollView,
   Image,
-  Alert,
   Modal,
-  Pressable,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import React, { useState, useMemo } from "react";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import Gallery from "react-native-awesome-gallery";
+import { Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Button, ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import Gallery from "react-native-awesome-gallery";
 
 const ViewApprovedReport = ({ route }) => {
   const { report } = route.params;
+  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [confirmationImages, setConfirmationImages] = useState([]);
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
+
+  // Prepare gallery images from report.reportDetails[].images
+  const galleryImages = useMemo(() => {
+    if (report.reportDetails && Array.isArray(report.reportDetails)) {
+      return report.reportDetails
+        .flatMap((detail) => detail.images || [])
+        .map((img) => ({ uri: img.url }));
+    }
+    return [];
+  }, [report.reportDetails]);
+
+  // Prepare confirmation images if any
   const [isConfirmationGalleryVisible, setIsConfirmationGalleryVisible] =
     useState(false);
   const [selectedConfirmationImageIndex, setSelectedConfirmationImageIndex] =
     useState(0);
-  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
-  const galleryImages = useMemo(() => {
-    return report.reportDetails
-      .flatMap((detail) => detail.images || [])
-      .map((img) => ({
-        uri: img.url,
-      }));
-  }, [report.reportDetails]);
 
   const selectImages = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -50,11 +54,10 @@ const ViewApprovedReport = ({ route }) => {
     }
   };
 
+  // Take a picture using camera
   const takePicture = async () => {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
     });
 
@@ -63,28 +66,21 @@ const ViewApprovedReport = ({ route }) => {
     }
   };
 
+  // Show alert to choose image source
   const handleImageSelection = () => {
     Alert.alert(
       "Select Image",
       "Choose an option",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Select from Gallery",
-          onPress: selectImages,
-        },
-        {
-          text: "Take a Picture",
-          onPress: takePicture,
-        },
+        { text: "Cancel", style: "cancel" },
+        { text: "Select from Gallery", onPress: selectImages },
+        { text: "Take a Picture", onPress: takePicture },
       ],
       { cancelable: true }
     );
   };
 
+  // Update status to Resolved with confirmation images
   const updateStatusToResolved = async () => {
     if (confirmationImages.length < 1) {
       Alert.alert("Error", "Please select at least 1 image for confirmation.");
@@ -139,174 +135,211 @@ const ViewApprovedReport = ({ route }) => {
     }
   };
 
-  console.log("Gallery Images:", galleryImages.length);
-
   return (
-    <ScrollView style={styles.container}>
-      <Animated.Text entering={FadeInDown} style={styles.headerText}>
-        Approved Report
-      </Animated.Text>
-      <Animated.View entering={FadeInUp} style={styles.reportCard}>
-        <Text style={styles.reportTitle}>
-          Plate Number: {report.plateNumber}
-        </Text>
-        <Text style={styles.reportDescription}>Count: {report.count}</Text>
-        <Text style={styles.reportDescription}>
-          Created At: {new Date(report.createdAt).toLocaleString()}
-        </Text>
+    <View style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
+      <ScrollView style={styles.container}>
+        <Animated.Text entering={FadeInDown} style={styles.headerText}>
+          Approved Report
+        </Animated.Text>
+        <Animated.View entering={FadeInUp} style={styles.reportCard}>
+          <Text style={styles.reportTitle}>Plate Number:</Text>
+          <Text style={styles.reportDescription}>{report.plateNumber}</Text>
 
-        {galleryImages.length > 0 && (
-          <View style={{ marginBottom: 20 }}>
-            <Text style={styles.sectionHeader}>Report Images:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginTop: 10 }}
-            >
-              {galleryImages.slice(0, 2).map((img, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  onPress={() => {
-                    setSelectedImageIndex(idx);
-                    setIsGalleryVisible(true);
+          <Text style={styles.reportTitle}>Created At:</Text>
+          <Text style={styles.reportDescription}>
+            {new Date(report.createdAt).toLocaleString()}
+          </Text>
+
+          <Text style={styles.sectionHeader}>Violations:</Text>
+          {report.violations && Array.isArray(report.violations) ? (
+            report.violations.map((violation, idx) => (
+              <Text key={idx} style={styles.reportDescription}>
+                {violation.types ? violation.types.join(", ") : violation}
+              </Text>
+            ))
+          ) : (
+            <Text style={styles.reportDescription}>None</Text>
+          )}
+
+          <Text style={styles.sectionHeader}>Report Details:</Text>
+          {report.reportDetails && Array.isArray(report.reportDetails) ? (
+            report.reportDetails.map((detail, idx) => (
+              <View key={idx} style={{ marginBottom: 10 }}>
+                <Text style={styles.reportDescription}>
+                  <Text style={{ fontWeight: "bold" }}>Description: </Text>
+                  {detail.original}
+                </Text>
+                <Text style={styles.reportDescription}>
+                  <Text style={{ fontWeight: "bold" }}>Location: </Text>
+                  {detail.location}
+                </Text>
+                <Text style={styles.reportDescription}>
+                  <Text style={{ fontWeight: "bold" }}>Status: </Text>
+                  {detail.status}
+                </Text>
+                <Text style={styles.reportDescription}>
+                  <Text style={{ fontWeight: "bold" }}>Complain Date: </Text>
+                  {new Date(detail.createdAt).toLocaleString()}
+                </Text>
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: "#e0e0e0",
+                    marginVertical: 10,
                   }}
-                >
-                  <View
-                    style={{
-                      position: "relative",
-                      width: 150,
-                      height: 100,
-                      marginRight: 10,
-                      overflow: "hidden",
-                      borderRadius: 10,
+                />
+              </View>
+            ))
+          ) : (
+            <Text style={styles.reportDescription}>No details available.</Text>
+          )}
+
+          {galleryImages.length > 0 && (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={styles.sectionHeader}>Report Images:</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginTop: 10 }}
+              >
+                {galleryImages.slice(0, 2).map((img, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() => {
+                      setSelectedImageIndex(idx);
+                      setIsGalleryVisible(true);
                     }}
                   >
-                    <Image
-                      source={{ uri: img.uri }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 10,
-                      }}
-                      resizeMode="cover"
-                    />
-                    {idx === 1 && galleryImages.length > 2 && (
-                      <View style={styles.moreImagesOverlay}>
-                        <Text style={styles.moreImagesText}>
-                          +{galleryImages.length - 2}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            {/* Modal for full-screen gallery */}
-            <Modal visible={isGalleryVisible} transparent={true}>
-              <View style={styles.galleryContainer}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setIsGalleryVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
-                <Gallery
-                  data={galleryImages.map((img) => img.uri)}
-                  initialIndex={selectedImageIndex}
-                  onSwipeToClose={() => setIsGalleryVisible(false)}
-                  numToRender={5}
-                  emptySpaceWidth={20}
-                  doubleTapScale={2}
-                  maxScale={4}
-                  loop={true}
-                />
-              </View>
-            </Modal>
-          </View>
-        )}
+                    <View style={styles.imagePreview}>
+                      <Image
+                        source={{ uri: img.uri }}
+                        style={styles.image}
+                        resizeMode="cover"
+                      />
+                      {idx === 1 && galleryImages.length > 2 && (
+                        <View style={styles.moreImagesOverlay}>
+                          <Text style={styles.moreImagesText}>
+                            +{galleryImages.length - 2}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              {/* Modal for full-screen gallery */}
+              <Modal visible={isGalleryVisible} transparent={true}>
+                <View style={styles.galleryContainer}>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setIsGalleryVisible(false)}
+                  >
+                    <Text style={styles.closeButtonText}>X</Text>
+                  </TouchableOpacity>
+                  <Gallery
+                    data={galleryImages.map((img) => img.uri)}
+                    initialIndex={selectedImageIndex}
+                    onSwipeToClose={() => setIsGalleryVisible(false)}
+                    numToRender={5}
+                    emptySpaceWidth={20}
+                    doubleTapScale={2}
+                    maxScale={4}
+                    loop={true}
+                  />
+                </View>
+              </Modal>
+            </View>
+          )}
 
-        <Text style={styles.sectionHeader}>Violations:</Text>
-        {report.violations.map((violation, index) => (
-          <View key={index} style={styles.violationItem}>
-            <Text style={styles.violationText}>
-              Types: {violation.types.join(", ")}
-            </Text>
-          </View>
-        ))}
-
-        <Text style={styles.sectionHeader}>Report Details:</Text>
-        {report.reportDetails.map((detail, index) => (
-          <View key={index} style={styles.reportDetailItem}>
-            <Text style={styles.reportDetailText}>
-              Description: {detail.original}
-            </Text>
-            <Text style={styles.reportDetailText}>
-              Location: {detail.location}
-            </Text>
-            <Text style={styles.reportDetailText}>Status: {detail.status}</Text>
-            <Text style={styles.reportDetailText}>
-              Created At: {new Date(detail.createdAt).toLocaleString()}
-            </Text>
-          </View>
-        ))}
-
-        <Button
-          mode="contained"
-          onPress={handleImageSelection}
-          style={styles.button}
-        >
-          Select Confirmation Images
-        </Button>
-        {confirmationImages.length > 0 && (
-          <View style={styles.imagesContainer}>
-            {confirmationImages.map((image, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  setSelectedConfirmationImageIndex(index);
-                  setIsConfirmationGalleryVisible(true);
-                }}
+          {confirmationImages.length > 0 && (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={styles.sectionHeader}>Confirmation Images:</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginTop: 10 }}
               >
-                <Image source={{ uri: image.uri }} style={styles.image} />
-              </TouchableOpacity>
-            ))}
-            {/* Modal for confirmation images gallery */}
-            <Modal visible={isConfirmationGalleryVisible} transparent={true}>
-              <View style={styles.galleryContainer}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setIsConfirmationGalleryVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
-                <Gallery
-                  data={confirmationImages.map((img) => img.uri)}
-                  initialIndex={selectedConfirmationImageIndex}
-                  onSwipeToClose={() => setIsConfirmationGalleryVisible(false)}
-                  numToRender={5}
-                  emptySpaceWidth={20}
-                  doubleTapScale={2}
-                  maxScale={4}
-                  loop={true}
-                />
-              </View>
-            </Modal>
+                {confirmationImages.slice(0, 2).map((img, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() => {
+                      setSelectedConfirmationImageIndex(idx);
+                      setIsConfirmationGalleryVisible(true);
+                    }}
+                  >
+                    <View style={styles.imagePreview}>
+                      <Image
+                        source={{ uri: img.uri }}
+                        style={styles.image}
+                        resizeMode="cover"
+                      />
+                      {idx === 1 && confirmationImages.length > 2 && (
+                        <View style={styles.moreImagesOverlay}>
+                          <Text style={styles.moreImagesText}>
+                            +{confirmationImages.length - 2}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              {/* Modal for confirmation images gallery */}
+              <Modal visible={isConfirmationGalleryVisible} transparent={true}>
+                <View style={styles.galleryContainer}>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setIsConfirmationGalleryVisible(false)}
+                  >
+                    <Text style={styles.closeButtonText}>X</Text>
+                  </TouchableOpacity>
+                  <Gallery
+                    data={confirmationImages.map((img) => img.uri)}
+                    initialIndex={selectedConfirmationImageIndex}
+                    onSwipeToClose={() =>
+                      setIsConfirmationGalleryVisible(false)
+                    }
+                    numToRender={5}
+                    emptySpaceWidth={20}
+                    doubleTapScale={2}
+                    maxScale={4}
+                    loop={true}
+                  />
+                </View>
+              </Modal>
+            </View>
+          )}
+
+          <View style={styles.fixedButtonContainer}>
+            <Button
+              mode="contained"
+              onPress={handleImageSelection}
+              style={{
+                marginBottom: 10,
+                backgroundColor: "#6200ee",
+                width: "100%",
+              }}
+              disabled={loading}
+            >
+              Select Confirmation Images
+            </Button>
+
+            {loading ? (
+              <ActivityIndicator size="large" color="#6200ee" />
+            ) : (
+              <Button
+                mode="contained"
+                onPress={updateStatusToResolved}
+                style={{ backgroundColor: "#6200ee", width: "100%" }}
+                disabled={loading}
+              >
+                Update Status to Resolved
+              </Button>
+            )}
           </View>
-        )}
-        <Button
-          mode="contained"
-          onPress={updateStatusToResolved}
-          style={styles.button}
-        >
-          Update Status to Resolved
-        </Button>
-      </Animated.View>
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#6e44ff" />
-        </View>
-      )}
-    </ScrollView>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -329,7 +362,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 40,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -340,7 +373,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 10,
+    marginTop: 10,
   },
   reportDescription: {
     fontSize: 16,
@@ -354,71 +387,34 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
   },
-  violationItem: {
-    marginBottom: 10,
-  },
-  violationText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  reportDetailItem: {
-    marginBottom: 15,
-  },
-  reportDetailText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  imagesContainer: {
-    marginTop: 20,
-    flexDirection: "row",
-    flexWrap: "wrap",
+  imagePreview: {
+    position: "relative",
+    width: 150,
+    height: 100,
+    marginRight: 10,
+    overflow: "hidden",
+    borderRadius: 10,
   },
   image: {
-    width: 100,
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  moreImagesOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 150,
     height: 100,
+    backgroundColor: "rgba(0,0,0,0.5)",
     borderRadius: 10,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-  button: {
-    marginTop: 20,
-    backgroundColor: "#6200ee",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "center",
     alignItems: "center",
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 10,
-    alignItems: "center",
-    maxWidth: "90%",
-    maxHeight: "80%",
-  },
-  modalImage: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
-  },
-  exitButton: {
-    backgroundColor: "#6200ee",
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-  },
-  exitButtonText: {
+  moreImagesText: {
     color: "#fff",
+    fontSize: 32,
     fontWeight: "bold",
-    fontSize: 16,
   },
   galleryContainer: {
     flex: 1,
@@ -438,20 +434,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  moreImagesOverlay: {
-    position: "absolute",
-    top: 0,
+  fixedButtonContainer: {
     left: 0,
-    width: 150,
-    height: 100,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 10,
-    justifyContent: "center",
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
     alignItems: "center",
-  },
-  moreImagesText: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "bold",
+    justifyContent: "center",
+    zIndex: 100,
   },
 });

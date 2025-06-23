@@ -16,6 +16,7 @@ import AnnouncementsScreen from "../screens/AnnouncementsScreen";
 import ViewAnnouncementScreen from "../screens/ViewAnnouncementScreen";
 import ViewReportScreen from "../screens/ViewReportScreen";
 import StreetScreen from "../screens/Maps/StreetScreen";
+import ViewApprovedObstruction from "../screens/Admin/ViewApprovedObstruction";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -57,7 +58,7 @@ const Navigator = () => {
         component={DetailReportScreen}
         options={{ headerShown: false }}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="DetailObstructionScreen"
         component={DetailObstructionScreen}
         options={{ headerShown: false }}
@@ -75,23 +76,33 @@ const Navigator = () => {
       <Stack.Screen
         name="ApproveObstruction"
         component={ApproveObstruction}
-        options={{ headerShown: false }}/>
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="AnnouncementsScreen"
         component={AnnouncementsScreen}
-        options={{ headerShown: false }}/>
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="ViewAnnouncementScreen"
         component={ViewAnnouncementScreen}
-        options={{ headerShown: false }}/>
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="ViewReportScreen"
         component={ViewReportScreen}
-        options={{ headerShown: false }}/>
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="StreetScreen"
         component={StreetScreen}
-        options={{ headerShown: false }}/>
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ViewApprovedObstruction"
+        component={ViewApprovedObstruction}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 };
