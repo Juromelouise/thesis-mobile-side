@@ -24,7 +24,7 @@ const EditProfileScreen = ({ route }) => {
   const [lastName, setLastName] = useState(user.lastName || "");
   const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || "");
   const [address, setAddress] = useState(user.address || "");
-  const [avatar1, setAvatar] = useState(user.avatar.url || null);
+  const [avatar1, setAvatar] = useState(user.avatar?.url || null);
   const [avatar2, setAvatar2] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});

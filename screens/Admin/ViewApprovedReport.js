@@ -105,17 +105,19 @@ const ViewApprovedReport = ({ route }) => {
         });
       }
 
-      setLoading(true);
+      console.log(formData)
 
-      const response = await axios.put(
-        `${BASE_URL}/report/update-status/${report._id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      // setLoading(true);
+
+      // const response = await axios.put(
+      //   `${BASE_URL}/report/update-status/${report._id}`,
+      //   formData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //   }
+      // );
 
       if (response.status === 200) {
         Alert.alert("Success", "Report status updated to resolved.");
