@@ -10,6 +10,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Modal,
+  FlatList,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -20,6 +22,7 @@ import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import { validateReportForm } from "../../utils/formValidation";
 import * as ImageManipulator from "expo-image-manipulator";
+import { Picker } from "@react-native-picker/picker";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
@@ -34,6 +37,174 @@ export default function ReportScreen() {
   const [geocode, setGeocode] = useState(null);
 
   const navigation = useNavigation();
+
+  const streetOptions = [
+    "A. Ricarte Street",
+    "A. Santos Street",
+    "Accord Road",
+    "Adelfa 2 Street",
+    "Adelfa Street",
+    "Albutra Street",
+    "Alley 4C",
+    "Alley 4C Street",
+    "Alley Street",
+    "Almaciga",
+    "Almond",
+    "Anchor Street",
+    "Andres Bonifacio Avenue",
+    "Antonio Luna Avenue",
+    "Arca Boulevard",
+    "Avocado",
+    "Avocado Road",
+    "B. Valdez Street",
+    "BLC Road",
+    "Baao Street",
+    "Bagsakan Road",
+    "Balatan Street",
+    "Balatong Street",
+    "Bato Street",
+    "Bayabas Street",
+    "Bayani Road",
+    "Bermuda",
+    "Bougainvillea",
+    "C-5 Centennial Village Service Road",
+    "C. Duque Street",
+    "C. Romulo",
+    "C. Romulo Street",
+    "C. Yap Street",
+    "CRB Road",
+    "Cabuyao Street",
+    "Calachuchi",
+    "Campupot Street",
+    "Champaca Extension",
+    "Champaca Street",
+    "Coconut",
+    "Coconut Extension",
+    "Colonel Bravo Street",
+    "Cucumber Road",
+    "Daang Hari",
+    "Daisy",
+    "Daisy Street",
+    "Dalandan Street",
+    "Dalanghita Street",
+    "Dama de Noche",
+    "Damong Maria Street",
+    "Dayap Street",
+    "Del Pilar Street",
+    "Diego Silang Street",
+    "Dita Street",
+    "Duhat",
+    "Duhat Street",
+    "E. Adevoso Street",
+    "E. Aguinaldo Avenue",
+    "E. Balao Street",
+    "East Union Drive",
+    "Electronics Avenue",
+    "Eucalyptus Street",
+    "Evangelista Street",
+    "F. Dagohoy Street",
+    "F. Segundo Street",
+    "F. Ver Street",
+    "FTI Road",
+    "G. Francisco Street",
+    "G. Juliano Avenue",
+    "Geronimo Street",
+    "Guijo",
+    "Gulaman Street",
+    "Gumamela",
+    "Gumamela Street",
+    "Ilang-ilang",
+    "Ipil",
+    "Iriga Street",
+    "J. Vargas Street",
+    "J. de los Reyes Street",
+    "Jalandoni Street",
+    "Junction Street",
+    "Kablini Street",
+    "Kakaw Street",
+    "Kakawati Street",
+    "Kalachuchi Street",
+    "Kalamansi Street",
+    "Kalantas",
+    "Kalantas Street",
+    "Karangalan Road",
+    "Kasoy Street",
+    "LRT Sunflower Street",
+    "La Union Street",
+    "Langka Road",
+    "Lanting Street",
+    "Lao Street",
+    "Lawton Avenue",
+    "Libas Street",
+    "Lieutenant General Alfonso Arellano Avenue",
+    "Link Street",
+    "Llanera Street",
+    "M. Cabal Street",
+    "M. Castañeda Street",
+    "M. Peralta Street",
+    "M. Tinio Street",
+    "MDC Road",
+    "Macopa",
+    "Magbanua Street",
+    "Maharlika Road",
+    "Mais Street",
+    "Makabuhay Street",
+    "Malvar Street",
+    "Manggahan Street",
+    "Mango Road",
+    "Manuel Roxas Avenue",
+    "Manzanilla Street",
+    "Military Shrine Service Road",
+    "Molave",
+    "Nabua Street",
+    "Nexus Street",
+    "Orchid",
+    "P. Garcia Street",
+    "P. Ledesma Street",
+    "Palayan Road",
+    "Palo Maria Street",
+    "Pangasinan Street",
+    "Pulse Street",
+    "R. Atienza Street",
+    "R. Kangleon Street",
+    "R. Magsaysay Street",
+    "R. Papa",
+    "R. Papa Street",
+    "Radian Street",
+    "Rambutan Road",
+    "Rhodora",
+    "Romulo",
+    "Rosal",
+    "S. Aquino Street",
+    "SSB Road",
+    "Sahing Street",
+    "Saint Luke Street",
+    "Sales Road",
+    "Salong Street",
+    "Sambong Street",
+    "Sampaguita Street",
+    "Sampaloc Street",
+    "San Francisco Street",
+    "Santan",
+    "Simeon Ola Avenue",
+    "South Union Drive",
+    "Sunflower Street",
+    "Sync Street",
+    "T. Bautista Street",
+    "T. Mascardo Street",
+    "Talipapa Street",
+    "Tandem Road",
+    "Trias Street",
+    "Upper McKinley Road",
+    "V. Osias Street",
+    "Velasco Street",
+    "Veterans Road",
+    "Vicente Lukban Street",
+    "Waling-waling",
+    "West Union Drive",
+    "Yakal",
+    "Yengco Street",
+  ];
 
   const openCamera = async (index) => {
     let result = await ImagePicker.launchCameraAsync({
@@ -76,39 +247,63 @@ export default function ReportScreen() {
     );
   };
 
-  const getLocation = async () => {
-    setLoading(true);
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access location was denied");
-        setLoading(false);
-        return;
-      }
+  // const getLocation = async () => {
+  //   setLoading(true);
+  //   try {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       alert("Permission to access location was denied");
+  //       setLoading(false);
+  //       return;
+  //     }
 
-      let loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
+  //     let loc = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.High,
+  //     });
 
-      setGeocode({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
+  //     setGeocode({
+  //       latitude: loc.coords.latitude,
+  //       longitude: loc.coords.longitude,
+  //     });
 
-      const reverseGeocode = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
+  //     const reverseGeocode = await Location.reverseGeocodeAsync({
+  //       latitude: loc.coords.latitude,
+  //       longitude: loc.coords.longitude,
+  //     });
 
-      if (reverseGeocode.length > 0) {
-        const { street, city, region } = reverseGeocode[0];
-        setAddress(`${street}, ${city}, ${region}`);
-      }
-    } catch (error) {
-      console.error("Error fetching location:", error);
-    } finally {
-      setLoading(false);
-    }
+  //     if (reverseGeocode.length > 0) {
+  //       const { street, city, region } = reverseGeocode[0];
+  //       setAddress(`${street}, ${city}, ${region}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching location:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [filteredStreets, setFilteredStreets] = useState(streetOptions);
+
+  const openSearchModal = () => {
+    setSearchText("");
+    setFilteredStreets(streetOptions);
+    setSearchModalVisible(true);
+  };
+
+  const handleSearch = (text) => {
+    setSearchText(text);
+    setFilteredStreets(
+      streetOptions.filter((street) =>
+        street.toLowerCase().includes(text.toLowerCase())
+      )
+    );
+  };
+
+  const handleSelectStreet = (street) => {
+    setAddress(street);
+    setSearchModalVisible(false);
   };
 
   const pickImageAndUpload = async () => {
@@ -202,7 +397,7 @@ export default function ReportScreen() {
     formData.append("location", address);
     formData.append("plateNumber", plate);
     formData.append("postIt", userConfirmed);
-    formData.append("geocodeData", JSON.stringify(geocode));
+    // formData.append("geocodeData", JSON.stringify(geocode));
     image.map((imag) => {
       formData.append("images", imag);
     });
@@ -339,22 +534,97 @@ export default function ReportScreen() {
               </TouchableOpacity>
             </View>
           )}
-
           <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="Location"
-              placeholderTextColor="#aaa"
-              value={address}
-              onChangeText={setAddress}
-            />
             <TouchableOpacity
-              style={styles.locationButton}
-              onPress={getLocation}
+              style={{
+                flex: 1,
+                backgroundColor: "#fff",
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: "#ccc",
+                justifyContent: "center",
+                height: 50,
+                paddingHorizontal: 10,
+              }}
+              onPress={openSearchModal}
+              activeOpacity={0.8}
             >
-              <MaterialIcons name="my-location" size={20} color="#000" />
+              <Text style={{ color: address ? "#333" : "#aaa", fontSize: 16 }}>
+                {address || "Select Location"}
+              </Text>
             </TouchableOpacity>
           </View>
+
+          <Modal
+            visible={searchModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setSearchModalVisible(false)}
+          >
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.3)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  width: "90%",
+                  maxHeight: "70%",
+                  padding: 16,
+                }}
+              >
+                <TextInput
+                  placeholder="Search street..."
+                  value={searchText}
+                  onChangeText={handleSearch}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 8,
+                    padding: 10,
+                    marginBottom: 10,
+                  }}
+                  autoFocus
+                />
+                <FlatList
+                  data={filteredStreets}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => handleSelectStreet(item)}
+                      style={{
+                        paddingVertical: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: "#eee",
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, color: "#333" }}>
+                        {item}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  keyboardShouldPersistTaps="handled"
+                />
+                <TouchableOpacity
+                  onPress={() => setSearchModalVisible(false)}
+                  style={{
+                    marginTop: 10,
+                    alignSelf: "flex-end",
+                    padding: 8,
+                  }}
+                >
+                  <Text style={{ color: "#6e44ff", fontWeight: "bold" }}>
+                    Close
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           {addressError && <Text style={styles.errorText}>{addressError}</Text>}
 
           <TextInput

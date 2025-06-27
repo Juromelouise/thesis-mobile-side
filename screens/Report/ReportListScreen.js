@@ -4,12 +4,14 @@ import {
   View,
   FlatList,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
 import { Picker } from "@react-native-picker/picker";
+import LottieView from "lottie-react-native";
 
 const ReportListScreen = () => {
   const navigation = useNavigation();
@@ -25,6 +27,7 @@ const ReportListScreen = () => {
         setReportData(data.data.filter((item) => item.plateNumber === false));
       } else {
         setReportData(data.data);
+        console.log(data.data);
       }
     } catch (e) {
       console.log(e);
@@ -62,6 +65,34 @@ const ReportListScreen = () => {
       </Text>
     </TouchableOpacity>
   );
+  
+if (!reportData || reportData.length === 0) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Report List</Text>
+      <Picker
+        selectedValue={filter}
+        style={styles.picker}
+        onValueChange={(itemValue) => setFilter(itemValue)}
+      >
+        <Picker.Item label="All" value="all" />
+        <Picker.Item label="Vehicle Complaint" value="illegal_parking" />
+        <Picker.Item label="Non-Vehicle Complaint" value="obstruction" />
+      </Picker>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <LottieView
+          source={require("../../assets/nodata.json")}
+          autoPlay
+          loop
+          style={{ width: 250, height: 250 }}
+        />
+        <Text style={{ marginTop: 20, fontSize: 18, color: "#888" }}>
+          No Data Available
+        </Text>
+      </View>
+    </View>
+  );
+}
 
   return (
     <View style={styles.container}>
@@ -72,8 +103,8 @@ const ReportListScreen = () => {
         onValueChange={(itemValue) => setFilter(itemValue)}
       >
         <Picker.Item label="All" value="all" />
-        <Picker.Item label="Illegal Parking" value="illegal_parking" />
-        <Picker.Item label="Obstruction" value="obstruction" />
+        <Picker.Item label="Vehicle Complaint" value="illegal_parking" />
+        <Picker.Item label="Non-Vehicle Complaint" value="obstruction" />
       </Picker>
       <FlatList
         data={reportData}

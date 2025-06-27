@@ -13,6 +13,7 @@ import { BASE_URL } from "../../assets/common/config";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { Card, Title, Paragraph } from "react-native-paper";
+import LottieView from "lottie-react-native";
 
 const ApproveReports = () => {
   const [data, setData] = useState([]);
@@ -42,6 +43,32 @@ const ApproveReports = () => {
   }, []);
 
   const isPlateNumberReport = (item) => !!item.plateNumber;
+
+  if (!data || data.length === 0) {
+    return (
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <Animated.Text entering={FadeInDown} style={styles.headerText}>
+          Approved Reports
+        </Animated.Text>
+        <LottieView
+          source={require("../../assets/nodata.json")}
+          autoPlay
+          loop
+          style={{
+            width: 250,
+            height: 250,
+            alignSelf: "center",
+            marginTop: 170,
+          }}
+        />
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView

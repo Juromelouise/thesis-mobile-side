@@ -6,17 +6,25 @@ import {
   Image,
   Modal,
   TouchableOpacity,
+  ActivityIndicator,
   Alert,
 } from "react-native";
 import React, { useState, useMemo } from "react";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import Gallery from "react-native-awesome-gallery";
 import { Button } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import { BASE_URL } from "../../assets/common/config";
 
 const ViewApprovedObstruction = ({ route }) => {
   const { report } = route.params;
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [confirmationImages, setConfirmationImages] = useState([]);
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   // Prepare gallery images from report.images
   const galleryImages = useMemo(
@@ -25,13 +33,99 @@ const ViewApprovedObstruction = ({ route }) => {
   );
 
   // Prepare confirmation images if any
-  const [isConfirmationGalleryVisible, setIsConfirmationGalleryVisible] = useState(false);
-  const [selectedConfirmationImageIndex, setSelectedConfirmationImageIndex] = useState(0);
+  const [isConfirmationGalleryVisible, setIsConfirmationGalleryVisible] =
+    useState(false);
+  const [selectedConfirmationImageIndex, setSelectedConfirmationImageIndex] =
+    useState(0);
 
-  const confirmationImages = useMemo(
-    () => (report.confirmationImages || []).map((img) => ({ uri: img.url })),
-    [report.confirmationImages]
-  );
+  const selectImages = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      selectionLimit: 2,
+    });
+
+    if (!result.canceled) {
+      setConfirmationImages(result.assets.slice(0, 2));
+    }
+  };
+
+  // Take a picture using camera
+  const takePicture = async () => {
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setConfirmationImages([result.assets[0]]);
+    }
+  };
+
+  // Show alert to choose image source
+  const handleImageSelection = () => {
+    Alert.alert(
+      "Select Image",
+      "Choose an option",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Select from Gallery", onPress: selectImages },
+        { text: "Take a Picture", onPress: takePicture },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  // Update status to Resolved with confirmation images
+  const updateStatusToResolved = async () => {
+    if (confirmationImages.length < 1) {
+      Alert.alert("Error", "Please select at least 1 image for confirmation.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      confirmationImages.forEach((image, index) => {
+        formData.append("images", {
+          uri: image.uri,
+          type: "image/jpeg",
+          name: `confirmation_image_${index}.jpg`,
+        });
+      });
+      formData.append("status", "Resolved");
+      formData.append("reportId", report._id);
+
+      console.log(formData);
+
+      setLoading(true);
+
+      const response = await axios.put(
+        `${BASE_URL}/report/update-status/${report._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        Alert.alert("Success", "Report status updated to resolved.");
+        setLoading(false);
+        navigation.navigate("ApproveReports");
+      } else {
+        setLoading(false);
+        Alert.alert("Error", "Failed to update report status.");
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      Alert.alert(
+        "Error",
+        "An error occurred while updating the report status."
+      );
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -42,7 +136,7 @@ const ViewApprovedObstruction = ({ route }) => {
         <Text style={styles.reportTitle}>Location:</Text>
         <Text style={styles.reportDescription}>{report.location}</Text>
 
-        <Text style={styles.reportTitle}>Original (Tagalog):</Text>
+        <Text style={styles.reportTitle}>Complaint:</Text>
         <Text style={styles.reportDescription}>{report.original}</Text>
 
         <Text style={styles.reportTitle}>Status:</Text>
@@ -69,15 +163,23 @@ const ViewApprovedObstruction = ({ route }) => {
               {report.reporter?.firstName} {report.reporter?.lastName}
             </Text>
             <Text style={styles.reporterEmail}>{report.reporter?.email}</Text>
-            <Text style={styles.reporterPhone}>{report.reporter?.phoneNumber}</Text>
-            <Text style={styles.reporterAddress}>{report.reporter?.address}</Text>
+            <Text style={styles.reporterPhone}>
+              {report.reporter?.phoneNumber}
+            </Text>
+            <Text style={styles.reporterAddress}>
+              {report.reporter?.address}
+            </Text>
           </View>
         </View>
 
         {galleryImages.length > 0 && (
           <View style={{ marginBottom: 20 }}>
             <Text style={styles.sectionHeader}>Report Images:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 10 }}
+            >
               {galleryImages.slice(0, 2).map((img, idx) => (
                 <TouchableOpacity
                   key={idx}
@@ -87,10 +189,16 @@ const ViewApprovedObstruction = ({ route }) => {
                   }}
                 >
                   <View style={styles.imagePreview}>
-                    <Image source={{ uri: img.uri }} style={styles.image} resizeMode="cover" />
+                    <Image
+                      source={{ uri: img.uri }}
+                      style={styles.image}
+                      resizeMode="cover"
+                    />
                     {idx === 1 && galleryImages.length > 2 && (
                       <View style={styles.moreImagesOverlay}>
-                        <Text style={styles.moreImagesText}>+{galleryImages.length - 2}</Text>
+                        <Text style={styles.moreImagesText}>
+                          +{galleryImages.length - 2}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -124,7 +232,11 @@ const ViewApprovedObstruction = ({ route }) => {
         {confirmationImages.length > 0 && (
           <View style={{ marginBottom: 20 }}>
             <Text style={styles.sectionHeader}>Confirmation Images:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 10 }}
+            >
               {confirmationImages.slice(0, 2).map((img, idx) => (
                 <TouchableOpacity
                   key={idx}
@@ -134,10 +246,16 @@ const ViewApprovedObstruction = ({ route }) => {
                   }}
                 >
                   <View style={styles.imagePreview}>
-                    <Image source={{ uri: img.uri }} style={styles.image} resizeMode="cover" />
+                    <Image
+                      source={{ uri: img.uri }}
+                      style={styles.image}
+                      resizeMode="cover"
+                    />
                     {idx === 1 && confirmationImages.length > 2 && (
                       <View style={styles.moreImagesOverlay}>
-                        <Text style={styles.moreImagesText}>+{confirmationImages.length - 2}</Text>
+                        <Text style={styles.moreImagesText}>
+                          +{confirmationImages.length - 2}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -167,6 +285,34 @@ const ViewApprovedObstruction = ({ route }) => {
             </Modal>
           </View>
         )}
+
+        <View style={styles.fixedButtonContainer}>
+          <Button
+            mode="contained"
+            onPress={handleImageSelection}
+            style={{
+              marginBottom: 10,
+              backgroundColor: "#6200ee",
+              width: "100%",
+            }}
+            disabled={loading}
+          >
+            Select Confirmation Images
+          </Button>
+
+          {loading ? (
+            <ActivityIndicator size="large" color="#6200ee" />
+          ) : (
+            <Button
+              mode="contained"
+              onPress={updateStatusToResolved}
+              style={{ backgroundColor: "#6200ee", width: "100%" }}
+              disabled={loading}
+            >
+              Update Status to Resolved
+            </Button>
+          )}
+        </View>
       </Animated.View>
     </ScrollView>
   );
@@ -191,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 40,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

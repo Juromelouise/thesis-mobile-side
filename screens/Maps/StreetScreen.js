@@ -7,15 +7,17 @@ import { BASE_URL } from "../../assets/common/config";
 
 // Violation colors as in StreetLegends.jsx
 const violationColors = {
-  "Overnight parking": "#808080",
-  "Hazard parking": "#e57373",
-  "Illegal parking": "#fbc02d",
-  "Towing Zone": "#1976d2",
-  "Loading and Unloading": "#388e3c",
-  "Illegal Sidewalk Use": "#8e24aa",
+  "All Violations": "#808080",           // Gray
+  "Overnight parking": "#4B6CB7",        // Blue
+  "Hazard parking": "#e57373",           // Red
+  "Illegal parking": "#fbc02d",          // Yellow
+  "Towing Zone": "#1976d2",              // Deep Blue
+  "Loading and Unloading": "#388e3c",    // Green
+  "Illegal Sidewalk Use": "#8e24aa",     // Purple
 };
 
 const violationsList = [
+  { value: "All Violations", label: "All Violations" },
   { value: "Overnight parking", label: "Overnight Parking" },
   { value: "Hazard parking", label: "Hazard parking" },
   { value: "Illegal parking", label: "Illegal parking" },
