@@ -390,6 +390,8 @@ export default function ReportScreen() {
       );
     });
 
+    console.log("User confirmed:", userConfirmed);
+
     const formData = new FormData();
     let image = [];
     image = await setImageUpload(images);
