@@ -20,6 +20,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const ViewApprovedReport = ({ route }) => {
   const { report } = route.params;
+  console.log(report);
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -178,6 +179,10 @@ const ViewApprovedReport = ({ route }) => {
                 <Text style={styles.reportDescription}>
                   <Text style={{ fontWeight: "bold" }}>Status: </Text>
                   {detail.status}
+                </Text>
+                <Text style={styles.reportDescription}>
+                  <Text style={{ fontWeight: "bold" }}>Reason of Approval: </Text>
+                  {detail.reason}
                 </Text>
                 <Text style={styles.reportDescription}>
                   <Text style={{ fontWeight: "bold" }}>Complain Date: </Text>

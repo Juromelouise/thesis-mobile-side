@@ -13,28 +13,25 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
 import { API_URL, BASE_URL } from "../../assets/common/config";
 import axios from "axios";
 import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 import { validateReportForm } from "../../utils/formValidation";
 import * as ImageManipulator from "expo-image-manipulator";
-import { Picker } from "@react-native-picker/picker";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [plate, setPlate] = useState("");
+  const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [descriptionError, setDescriptionError] = useState("");
   const [addressError, setAddressError] = useState("");
-  const [plateError, setPlateError] = useState("");
   const [imagesError, setImagesError] = useState("");
-  const [geocode, setGeocode] = useState(null);
 
   const navigation = useNavigation();
 
@@ -77,7 +74,8 @@ export default function ReportScreen() {
     "Calachuchi",
     "Campupot Street",
     "Champaca Extension",
-    "Champaca Street",
+    "Champaca Street (short)",
+    "Champaca Street (long)",
     "Coconut",
     "Coconut Extension",
     "Colonel Bravo Street",
@@ -369,7 +367,6 @@ export default function ReportScreen() {
     const { valid, errors } = validateReportForm(description, address, images);
     setDescriptionError(errors.descriptionError);
     setAddressError(errors.addressError);
-    setPlateError(errors.plateError);
     setImagesError(errors.imagesError);
 
     if (!valid) {
@@ -399,6 +396,7 @@ export default function ReportScreen() {
     formData.append("location", address);
     formData.append("plateNumber", plate);
     formData.append("postIt", userConfirmed);
+    formData.append("details", details);
     // formData.append("geocodeData", JSON.stringify(geocode));
     image.map((imag) => {
       formData.append("images", imag);
@@ -412,11 +410,10 @@ export default function ReportScreen() {
       // setDescription("");
       // setPlate("");
       // setImages([]);
+      // setDetails("");
       setDescriptionError("");
       setAddressError("");
-      setPlateError("");
       setImagesError("");
-      setGeocode(null);
       setLoading(false);
       navigation.navigate("Home");
     } catch (error) {
@@ -628,6 +625,24 @@ export default function ReportScreen() {
             </View>
           </Modal>
           {addressError && <Text style={styles.errorText}>{addressError}</Text>}
+          {!plate ? (
+            <></>
+          ) : (
+            <>
+              <TextInput
+                style={[styles.input, styles.detailsInput]}
+                placeholder="Details of the Vehicle"
+                placeholderTextColor="#aaa"
+                multiline
+                value={details}
+                onChangeText={setDetails}
+                numberOfLines={4}
+              />
+              {descriptionError && (
+                <Text style={styles.errorText}>{descriptionError}</Text>
+              )}
+            </>
+          )}
 
           <TextInput
             style={[styles.input, styles.reasonInput]}
@@ -738,6 +753,18 @@ const styles = StyleSheet.create({
   },
   reasonInput: {
     height: 100,
+    textAlignVertical: "top",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    color: "#333",
+    marginBottom: 20,
+  },
+  detailsInput: {
+    height: 70,
     textAlignVertical: "top",
     backgroundColor: "#fff",
     borderRadius: 10,
