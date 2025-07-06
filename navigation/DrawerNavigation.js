@@ -7,7 +7,14 @@ import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../context/AuthContext";
 import Navigator from "./Navigator";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView} from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+} from "react-native";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { BASE_URL } from "../assets/common/config";
@@ -43,80 +50,79 @@ const CustomDrawerContent = ({ navigation }) => {
         />
         <Text style={styles.logoText}>BOVO</Text>
       </View>
-       <ScrollView
-      contentContainerStyle={{ paddingBottom: 40 }}
-      showsVerticalScrollIndicator={false}
-    >
-
-      {/* Home */}
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Home");
-        }}
-        style={styles.drawerButton}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
       >
-        <Icon name="home" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>Home</Text>
-      </TouchableOpacity>
+        {/* Home */}
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Home");
+          }}
+          style={styles.drawerButton}
+        >
+          <Icon name="home" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.drawerButtonText}>Home</Text>
+        </TouchableOpacity>
 
-      {/* Profile */}
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Profile");
-        }}
-        style={styles.drawerButton}
-      >
-        <Icon name="user" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>Profile</Text>
-      </TouchableOpacity>
+        {/* Profile */}
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Profile");
+          }}
+          style={styles.drawerButton}
+        >
+          <Icon name="user" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.drawerButtonText}>Profile</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Announcements");
-        }}
-        style={styles.drawerButton}
-      >
-        <MaterialIcon
-          name="announcement"
-          size={20}
-          color="#333"
-          style={styles.icon}
-        />
-        <Text style={styles.drawerButtonText}>Announcements</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Announcements");
+          }}
+          style={styles.drawerButton}
+        >
+          <MaterialIcon
+            name="announcement"
+            size={20}
+            color="#333"
+            style={styles.icon}
+          />
+          <Text style={styles.drawerButtonText}>Announcements</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Street Map");
-        }}
-        style={styles.drawerButton}
-      >
-        <Icon name="map" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>Street Map</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Street Map");
+          }}
+          style={styles.drawerButton}
+        >
+          <Icon name="map" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.drawerButtonText}>Street Map</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("List");
-        }}
-        style={styles.drawerButton}
-      >
-        <Icon name="th-list" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>List of Reports</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("List");
+          }}
+          style={styles.drawerButton}
+        >
+          <Icon name="th-list" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.drawerButtonText}>List of Reports</Text>
+        </TouchableOpacity>
 
-      {/* Report */}
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Illegal Parking");
-        }}
-        style={styles.drawerButton}
-      >
-        <Icon name="file" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>Submit a Report</Text>
-      </TouchableOpacity>
+        {/* Report */}
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Illegal Parking");
+          }}
+          style={styles.drawerButton}
+        >
+          <Icon name="file" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.drawerButtonText}>Submit a Report</Text>
+        </TouchableOpacity>
 
-      {/* <TouchableOpacity
+        {/* <TouchableOpacity
         onPress={() => setIsReportDropdownOpen(!isReportDropdownOpen)}
         style={styles.drawerButton}
       >
@@ -130,8 +136,8 @@ const CustomDrawerContent = ({ navigation }) => {
         />
       </TouchableOpacity> */}
 
-      {/* Dropdown for Report options */}
-      {/* {isReportDropdownOpen && (
+        {/* Dropdown for Report options */}
+        {/* {isReportDropdownOpen && (
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -157,17 +163,26 @@ const CustomDrawerContent = ({ navigation }) => {
         </View>
       )} */}
 
-      {/* Admin */}
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Approve Reports");
-        }}
-        style={styles.drawerButton}
-      >
-        <MaterialIcons name="admin-panel-settings" size={20} color="#333" style={styles.icon} />
-        <Text style={styles.drawerButtonText}>Admin</Text>
-      </TouchableOpacity>
-      {/* {user && (user.role === "admin" || user.role === "superadmin") && (
+        {/* Admin */}
+        {user && (user.role === "admin" || user.role === "superadmin") && (
+          <>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Approve Reports");
+              }}
+              style={styles.drawerButton}
+            >
+              <MaterialIcons
+                name="admin-panel-settings"
+                size={20}
+                color="#333"
+                style={styles.icon}
+              />
+              <Text style={styles.drawerButtonText}>Admin</Text>
+            </TouchableOpacity>
+          </>
+        )}
+        {/* {user && (user.role === "admin" || user.role === "superadmin") && (
         <>
           <TouchableOpacity
             onPress={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}
@@ -190,8 +205,8 @@ const CustomDrawerContent = ({ navigation }) => {
         </>
       )} */}
 
-      {/* Dropdown for Admin options */}
-      {/* {isAdminDropdownOpen && (
+        {/* Dropdown for Admin options */}
+        {/* {isAdminDropdownOpen && (
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -214,18 +229,18 @@ const CustomDrawerContent = ({ navigation }) => {
         </View>
       )} */}
 
-      {/* Logout */}
-      <TouchableOpacity
-        onPress={() => {
-          logout();
-        }}
-        style={[styles.drawerButton, styles.logoutButton]}
-      >
-        <Icon name="sign-out" size={20} color="#fff" style={styles.icon} />
-        <Text style={[styles.drawerButtonText, styles.logoutButtonText]}>
-          Logout
-        </Text>
-      </TouchableOpacity>
+        {/* Logout */}
+        <TouchableOpacity
+          onPress={() => {
+            logout();
+          }}
+          style={[styles.drawerButton, styles.logoutButton]}
+        >
+          <Icon name="sign-out" size={20} color="#fff" style={styles.icon} />
+          <Text style={[styles.drawerButtonText, styles.logoutButtonText]}>
+            Logout
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

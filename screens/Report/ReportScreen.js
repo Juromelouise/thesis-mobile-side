@@ -152,7 +152,6 @@ export default function ReportScreen() {
     "Mango Road",
     "Manuel Roxas Avenue",
     "Manzanilla Street",
-    "Military Shrine Service Road",
     "Molave",
     "Nabua Street",
     "Nexus Street",
@@ -244,41 +243,6 @@ export default function ReportScreen() {
       { cancelable: true }
     );
   };
-
-  // const getLocation = async () => {
-  //   setLoading(true);
-  //   try {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       alert("Permission to access location was denied");
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     let loc = await Location.getCurrentPositionAsync({
-  //       accuracy: Location.Accuracy.High,
-  //     });
-
-  //     setGeocode({
-  //       latitude: loc.coords.latitude,
-  //       longitude: loc.coords.longitude,
-  //     });
-
-  //     const reverseGeocode = await Location.reverseGeocodeAsync({
-  //       latitude: loc.coords.latitude,
-  //       longitude: loc.coords.longitude,
-  //     });
-
-  //     if (reverseGeocode.length > 0) {
-  //       const { street, city, region } = reverseGeocode[0];
-  //       setAddress(`${street}, ${city}, ${region}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching location:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -387,7 +351,6 @@ export default function ReportScreen() {
       );
     });
 
-    console.log("User confirmed:", userConfirmed);
 
     const formData = new FormData();
     let image = [];
@@ -638,9 +601,7 @@ export default function ReportScreen() {
                 onChangeText={setDetails}
                 numberOfLines={4}
               />
-              {descriptionError && (
-                <Text style={styles.errorText}>{descriptionError}</Text>
-              )}
+             
             </>
           )}
 

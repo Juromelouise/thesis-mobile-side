@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -17,9 +18,11 @@ const ReportListScreen = () => {
   const navigation = useNavigation();
   const [reportData, setReportData] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   const getData = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.get(`${BASE_URL}/report/fetch/all`);
       if (filter === "illegal_parking") {
         setReportData(data.data.filter((item) => item.plateNumber === true));
@@ -32,10 +35,10 @@ const ReportListScreen = () => {
     } catch (e) {
       console.log(e);
       navigation.navigate("Home");
+    } finally {
+      setLoading(false);
     }
   };
-
-  console.log(reportData);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -60,39 +63,48 @@ const ReportListScreen = () => {
       <Text style={styles.location}>{item.location}</Text>
       <Text style={styles.description}>
         {item.description.length > 50
-          ? `${item.original.substring(0, 50)}...`
-          : item.original}
+          ? `${item.description.substring(0, 50)}...`
+          : item.description}
       </Text>
     </TouchableOpacity>
   );
-  
-if (!reportData || reportData.length === 0) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Report List</Text>
-      <Picker
-        selectedValue={filter}
-        style={styles.picker}
-        onValueChange={(itemValue) => setFilter(itemValue)}
-      >
-        <Picker.Item label="All" value="all" />
-        <Picker.Item label="Vehicle Complaint" value="illegal_parking" />
-        <Picker.Item label="Non-Vehicle Complaint" value="obstruction" />
-      </Picker>
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <LottieView
-          source={require("../../assets/nodata.json")}
-          autoPlay
-          loop
-          style={{ width: 250, height: 250 }}
-        />
-        <Text style={{ marginTop: 20, fontSize: 18, color: "#888" }}>
-          No Data Available
-        </Text>
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading reports...</Text>
       </View>
-    </View>
-  );
-}
+    );
+  }
+
+  if (!reportData || reportData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>Report List</Text>
+        <Picker
+          selectedValue={filter}
+          style={styles.picker}
+          onValueChange={(itemValue) => setFilter(itemValue)}
+        >
+          <Picker.Item label="All" value="all" />
+          <Picker.Item label="Vehicle Complaint" value="illegal_parking" />
+          <Picker.Item label="Non-Vehicle Complaint" value="obstruction" />
+        </Picker>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <LottieView
+            source={require("../../assets/nodata.json")}
+            autoPlay
+            loop
+            style={{ width: 250, height: 250 }}
+          />
+          <Text style={{ marginTop: 20, fontSize: 18, color: "#888" }}>
+            No Data Available
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -123,6 +135,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#f5f5f5",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#333",
   },
   header: {
     fontSize: 24,

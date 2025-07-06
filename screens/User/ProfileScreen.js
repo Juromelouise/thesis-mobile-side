@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { Avatar, Title, Text, Button, Divider, List } from "react-native-paper";
-import { FontAwesome } from "@expo/vector-icons"; // Corrected import
+import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
+      setIsLoading(true);
       axios
         .get(`${BASE_URL}/user/profile`)
         .then((response) => {
@@ -20,9 +22,21 @@ const ProfileScreen = () => {
         })
         .catch((error) => {
           console.error("Error fetching profile data: ", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     }, [])
   );
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -80,6 +94,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
   },
   header: {
     justifyContent: "center",

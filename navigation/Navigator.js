@@ -17,6 +17,8 @@ import ViewAnnouncementScreen from "../screens/ViewAnnouncementScreen";
 import ViewReportScreen from "../screens/ViewReportScreen";
 import StreetScreen from "../screens/Maps/StreetScreen";
 import ViewApprovedObstruction from "../screens/Admin/ViewApprovedObstruction";
+import EditReportScreen from "../screens/Report/EditReportScreen";
+import EditObstructionScreen from "../screens/Report/EditObstructionScreen";
 
 const Navigator = () => {
   const Stack = createNativeStackNavigator();
@@ -101,6 +103,16 @@ const Navigator = () => {
       <Stack.Screen
         name="ViewApprovedObstruction"
         component={ViewApprovedObstruction}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditReportScreen"
+        component={EditReportScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditObstructionScreen"
+        component={EditObstructionScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

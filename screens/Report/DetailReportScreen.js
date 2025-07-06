@@ -4,51 +4,33 @@ import {
   View,
   Image,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
   SafeAreaView,
   ActivityIndicator,
   Alert,
 } from "react-native";
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { Modal, Portal, Button } from "react-native-paper";
-import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
+import {  Button } from "react-native-paper";
 import { BASE_URL } from "../../assets/common/config";
 import axios from "axios";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { setImageUpload } from "../../utils/formData";
 import { useNavigation } from "@react-navigation/native";
 
 const DetailReportScreen = ({ route }) => {
   const [data, setData] = useState({});
-  const [images, setImages] = useState([]);
-  const [description, setDescription] = useState("");
-  const [address, setAddress] = useState("");
-  const [plate, setPlate] = useState("");
   const [status, setStatus] = useState("");
   const [violations, setViolations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = React.useState(false);
   const [confirmationImages, setConfirmationImages] = useState([]);
   const navigate = useNavigation();
 
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
-  const containerStyle = { backgroundColor: "white", padding: 10 };
 
   const getData = async () => {
+    setLoading(true);
     const id = route.params.report;
     try {
       const { data } = await axios.get(`${BASE_URL}/report/admin/report/${id}`);
       setData(data.report);
-      setStatus(data.report.status || "N/A");
-      setDescription(data.report.original || "");
-      setAddress(data.report.location || "");
-      setPlate(data.report.plateNumber?.plateNumber || "");
       setConfirmationImages(data?.report?.confirmationImages || []);
-
       if (
         data.report.plateNumber &&
         Array.isArray(data.report.plateNumber.violations)
@@ -59,95 +41,18 @@ const DetailReportScreen = ({ route }) => {
       } else {
         setViolations([]);
       }
+      if (data.report.status === "Pending") {
+        setStatus("Submitted");
+      }else {
+        setStatus(data.data.status);
+      }
+      setLoading(false);
     } catch (e) {
+      setLoading(false);
       console.error(e);
       navigate.navigate("Home");
     }
   };
-
-  const pickImage = async () => {
-    if (images.length >= 4) {
-      alert("You can only add up to 4 images.");
-      return;
-    }
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setImages((prevImages) => {
-        const updatedImages = [...prevImages, result.assets[0].uri].slice(0, 4);
-        return updatedImages;
-      });
-    }
-  };
-
-  const getLocation = async () => {
-    setLoading(true);
-
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access location was denied");
-        setLoading(false);
-        return;
-      }
-
-      let loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
-
-      const reverseGeocode = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
-
-      if (reverseGeocode.length > 0) {
-        const { street, city, region } = reverseGeocode[0];
-        setAddress(`${street}, ${city}, ${region}`);
-        console.log("Address:", `${street}, ${city}, ${region}`);
-      }
-    } catch (error) {
-      console.error("Error fetching location:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const pickImageAndUpload = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [8, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const imageUri = result.assets[0].uri;
-      try {
-        const formData = new FormData();
-        formData.append("imageReport", {
-          uri: imageUri,
-          type: "image/jpg",
-          name: "plate_number.jpg",
-        });
-
-        const response = await axios.post(
-          `${BASE_URL}/report/extract/text`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        setPlate(response.data.extractedText);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    }
-  };
-
-  console.log("Report ID:", data);
 
   const deleteReport = async (id) => {
     Alert.alert(
@@ -190,47 +95,20 @@ const DetailReportScreen = ({ route }) => {
     );
   };
 
-  const handleSubmit = async (id) => {
-    setLoading(true);
-    setVisible(false);
-    const formData = new FormData();
-
-    let image = [];
-    image = await setImageUpload(images);
-    formData.append("description", description);
-    formData.append("location", address);
-    formData.append("plateNumber", plate);
-    image.map((imag) => {
-      formData.append("images", imag);
-    });
-
-    try {
-      const { data } = await axios.put(
-        `${BASE_URL}/report/update/report/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      setData(data.report);
-      setAddress("");
-      setDescription("");
-      setPlate("");
-      setImages([]);
-      alert("Updated Successfully");
-      setLoading(false);
-    } catch (error) {
-      console.error("Error on reportScreen:", error);
-      navigate.navigate("Home");
-      setLoading(false);
-    }
-  };
-
   useFocusEffect(
     useCallback(() => {
       getData();
     }, [route.params.report])
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
+        <Text style={styles.loadingText}>Loading report details...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -301,7 +179,7 @@ const DetailReportScreen = ({ route }) => {
             <>
               <Button
                 style={{ marginTop: 30 }}
-                onPress={showModal}
+                onPress={()=> navigate.navigate("EditReportScreen", { report: data })}
                 mode="contained"
               >
                 Edit Report
@@ -323,114 +201,8 @@ const DetailReportScreen = ({ route }) => {
             </>
           )}
         </View>
-
-        {/* Modal */}
-        <Portal>
-          <Modal
-            visible={visible}
-            onDismiss={hideModal}
-            contentContainerStyle={[containerStyle, { maxHeight: "80%" }]}
-          >
-            <ScrollView contentContainerStyle={{ paddingVertical: 10 }}>
-              <View style={styles.reportSection}>
-                <Text style={styles.reportText}>Update Report</Text>
-
-                {/* Display Images Dynamically */}
-                <View style={[styles.imagesContainer, { minHeight: 160 }]}>
-                  {images.length > 0 ? (
-                    images.map((imageUri, index) => (
-                      <Image
-                        key={index}
-                        source={{ uri: imageUri }}
-                        style={styles.modalImage}
-                        resizeMode="cover"
-                      />
-                    ))
-                  ) : data.images && data.images.length > 0 ? (
-                    data.images.map((img, index) => (
-                      <Image
-                        key={index}
-                        source={{ uri: img.url }}
-                        style={styles.modalImage}
-                        resizeMode="cover"
-                      />
-                    ))
-                  ) : (
-                    <Text style={styles.noImageText}>
-                      No images yet. Add one!
-                    </Text>
-                  )}
-                </View>
-
-                <TouchableOpacity
-                  style={styles.addImageButton}
-                  onPress={pickImage}
-                >
-                  <Ionicons name="camera" size={24} color="#fff" />
-                  <Text style={styles.addImageButtonText}>Add Image</Text>
-                </TouchableOpacity>
-
-                <View style={styles.inputRowWithIcon}>
-                  <TextInput
-                    style={[styles.input, styles.inputWithIcon]}
-                    placeholder="Plate Number"
-                    placeholderTextColor="#aaa"
-                    value={plate}
-                    onChangeText={setPlate}
-                  />
-                  <TouchableOpacity
-                    style={styles.iconButton}
-                    onPress={pickImageAndUpload}
-                  >
-                    <Ionicons name="camera" size={24} color="#000" />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.inputRowWithIcon}>
-                  <TextInput
-                    style={[styles.input, styles.inputWithIcon]}
-                    placeholder="Location"
-                    placeholderTextColor="#aaa"
-                    value={address}
-                    onChangeText={setAddress}
-                  />
-                  <TouchableOpacity
-                    style={styles.iconButton}
-                    onPress={getLocation}
-                  >
-                    <MaterialIcons name="my-location" size={20} color="#000" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Description Input */}
-                <TextInput
-                  style={[styles.input, styles.reasonInput]}
-                  placeholder="Reason"
-                  placeholderTextColor="#aaa"
-                  multiline
-                  value={description}
-                  onChangeText={setDescription}
-                  numberOfLines={4}
-                />
-
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={() => {
-                    handleSubmit(data._id);
-                  }}
-                >
-                  <Text style={styles.submitButtonText}>Submit</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </Modal>
-        </Portal>
+       
       </ScrollView>
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#6e44ff" />
-        </View>
-      )}
     </SafeAreaView>
   );
 };
@@ -601,5 +373,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     marginLeft: 8,
+  },
+    loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
