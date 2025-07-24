@@ -21,6 +21,7 @@
     "axios": "^1.7.7",
     "bad-words": "^4.0.0",
     "expo": "~51.0.39",
+    "expo-asset": "~10.0.10",
     "expo-dev-client": "~4.0.29",
     "expo-image-manipulator": "~12.0.5",
     "expo-image-picker": "~15.1.0",
@@ -28,6 +29,7 @@
     "expo-notifications": "~0.28.19",
     "expo-status-bar": "~1.12.1",
     "filipino-badwords-list": "^1.1.2",
+    "lottie-react-native": "6.7.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-awesome-gallery": "^0.4.3",
@@ -36,9 +38,7 @@
     "react-native-paper": "^5.13.1",
     "react-native-reanimated": "~3.10.1",
     "react-native-safe-area-context": "4.10.5",
-    "react-native-screens": "3.31.1",
-    "expo-asset": "~10.0.10",
-    "lottie-react-native": "6.7.0"
+    "react-native-screens": "3.31.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

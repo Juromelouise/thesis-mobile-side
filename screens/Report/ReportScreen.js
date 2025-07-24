@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,15 +12,18 @@ import {
   ActivityIndicator,
   Modal,
   FlatList,
+  Linking,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { API_URL, BASE_URL } from "../../assets/common/config";
 import axios from "axios";
 import { setImageUpload } from "../../utils/formData";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { validateReportForm } from "../../utils/formValidation";
 import * as ImageManipulator from "expo-image-manipulator";
+import * as Location from "expo-location";
 
 export default function ReportScreen() {
   const [images, setImages] = useState([]);
@@ -32,6 +35,11 @@ export default function ReportScreen() {
   const [descriptionError, setDescriptionError] = useState("");
   const [addressError, setAddressError] = useState("");
   const [imagesError, setImagesError] = useState("");
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [filteredStreets, setFilteredStreets] = useState(streetOptions);
+  const [location, setLocation] = useState(null);
+  const [locationStatus, setLocationStatus] = useState(false);
 
   const navigation = useNavigation();
 
@@ -244,10 +252,6 @@ export default function ReportScreen() {
     );
   };
 
-  const [searchModalVisible, setSearchModalVisible] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [filteredStreets, setFilteredStreets] = useState(streetOptions);
-
   const openSearchModal = () => {
     setSearchText("");
     setFilteredStreets(streetOptions);
@@ -298,11 +302,104 @@ export default function ReportScreen() {
     }
   };
 
+  const getAccurateLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Please enable location permissions in your device settings.",
+          [{ text: "OK", onPress: () => Linking.openSettings() }]
+        );
+      }
+
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        await Location.requestForegroundPermissionsAsync();
+      } else {
+        setLocationStatus(true);
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+        timeInterval: 5000,
+        distanceInterval: 0,
+        mayShowUserSettingsDialog: true,
+      });
+
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+
+      setLocation(coords);
+
+      return coords;
+    } catch (error) {
+      console.error("Location error:", error);
+      throw error;
+    }
+  };
+
+  const enableLocationServices = async () => {
+    try {
+      const isEnabled = await Location.hasServicesEnabledAsync();
+
+      if (isEnabled) {
+        return true;
+      }
+
+      const shouldOpenSettings = await new Promise((resolve) => {
+        Alert.alert(
+          "GPS Disabled",
+          "Please enable GPS/location services for this app to work properly",
+          [
+            {
+              text: "Cancel",
+              onPress: () => resolve(false),
+              style: "cancel",
+            },
+            {
+              text: "Open Settings",
+              onPress: () => resolve(true),
+            },
+          ]
+        );
+      });
+
+      if (shouldOpenSettings) {
+        if (Platform.OS === "android") {
+          await Linking.sendIntent("android.settings.LOCATION_SOURCE_SETTINGS");
+        } else {
+          await Linking.openSettings();
+        }
+
+        await Location.hasServicesEnabledAsync();
+
+        return await getAccurateLocation();
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error enabling location:", error);
+      return false;
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getAccurateLocation();
+    }, [])
+  );
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
       const { data } = await axios.get(`${BASE_URL}/user/profile`);
       setLoading(false);
+      if (!locationStatus) {
+        enableLocationServices();
+      }
       if (
         !data.user.address ||
         !data.user.phoneNumber ||
@@ -351,7 +448,7 @@ export default function ReportScreen() {
       );
     });
 
-
+    console.log("Images:", location);
     const formData = new FormData();
     let image = [];
     image = await setImageUpload(images);
@@ -360,6 +457,7 @@ export default function ReportScreen() {
     formData.append("plateNumber", plate);
     formData.append("postIt", userConfirmed);
     formData.append("details", details);
+    formData.append("geocode", JSON.stringify(location));
     // formData.append("geocodeData", JSON.stringify(geocode));
     image.map((imag) => {
       formData.append("images", imag);
@@ -374,6 +472,8 @@ export default function ReportScreen() {
       // setPlate("");
       // setImages([]);
       // setDetails("");
+      // setLocation(null);
+      setLocationStatus(false);
       setDescriptionError("");
       setAddressError("");
       setImagesError("");
@@ -601,7 +701,6 @@ export default function ReportScreen() {
                 onChangeText={setDetails}
                 numberOfLines={4}
               />
-             
             </>
           )}
 
