@@ -29,6 +29,7 @@ export default function ReportScreen() {
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
+  const [exactLocation, setExactLocation] = useState("");
   const [plate, setPlate] = useState("");
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ export default function ReportScreen() {
   const [filteredStreets, setFilteredStreets] = useState(streetOptions);
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState(false);
+  const [exactLocationError, setExactLocationError] = useState("");
 
   const navigation = useNavigation();
 
@@ -397,9 +399,7 @@ export default function ReportScreen() {
       setLoading(true);
       const { data } = await axios.get(`${BASE_URL}/user/profile`);
       setLoading(false);
-      if (!locationStatus) {
-        enableLocationServices();
-      }
+
       if (
         !data.user.address ||
         !data.user.phoneNumber ||
@@ -420,15 +420,25 @@ export default function ReportScreen() {
 
         return;
       }
+
+      if (!locationStatus) {
+        enableLocationServices();
+      }
     } catch (error) {
       setLoading(false);
       console.error("Error on Fetching Data:", error);
       navigation.navigate("ReportScreen");
     }
-    const { valid, errors } = validateReportForm(description, address, images);
+    const { valid, errors } = validateReportForm(
+      description,
+      address,
+      images,
+      exactLocation
+    );
     setDescriptionError(errors.descriptionError);
     setAddressError(errors.addressError);
     setImagesError(errors.imagesError);
+    setExactLocationError(errors.exactLocationError);
 
     if (!valid) {
       return;
@@ -448,7 +458,6 @@ export default function ReportScreen() {
       );
     });
 
-    console.log("Images:", location);
     const formData = new FormData();
     let image = [];
     image = await setImageUpload(images);
@@ -458,7 +467,7 @@ export default function ReportScreen() {
     formData.append("postIt", userConfirmed);
     formData.append("details", details);
     formData.append("geocode", JSON.stringify(location));
-    // formData.append("geocodeData", JSON.stringify(geocode));
+    formData.append("exactLocation", exactLocation);
     image.map((imag) => {
       formData.append("images", imag);
     });
@@ -473,10 +482,12 @@ export default function ReportScreen() {
       // setImages([]);
       // setDetails("");
       // setLocation(null);
+      // setExactLocation("");
       setLocationStatus(false);
       setDescriptionError("");
       setAddressError("");
       setImagesError("");
+      setExactLocationError("");
       setLoading(false);
       navigation.navigate("Home");
     } catch (error) {
@@ -688,6 +699,18 @@ export default function ReportScreen() {
             </View>
           </Modal>
           {addressError && <Text style={styles.errorText}>{addressError}</Text>}
+
+          <TextInput
+            style={[styles.input, { marginBottom: 20 }]}
+            placeholder="Exact Location of the Report"
+            placeholderTextColor="#aaa"
+            value={exactLocation}
+            onChangeText={setExactLocation}
+          />
+          {exactLocationError && (
+            <Text style={styles.errorText}>{exactLocationError}</Text>
+          )}
+
           {!plate ? (
             <></>
           ) : (

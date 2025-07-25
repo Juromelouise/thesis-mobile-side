@@ -21,6 +21,10 @@ export const validateReportForm = (description, address, images) => {
   //   errors.plateError = "Plate number is required";
   //   valid = false;
   // }
+  if (exactLocation === "") {
+    errors.exactLocationError = "Exact location is required";
+    valid = false;
+  }
 
   if (images.length !== 3) {
     errors.imagesError = "Exactly three images are required";
@@ -54,7 +58,13 @@ export const validateObsForm = (description, address, images) => {
   return { valid, errors };
 };
 
-export const validateEditProfileForm = (firstName, lastName, phoneNumber, address, avatar) => {
+export const validateEditProfileForm = (
+  firstName,
+  lastName,
+  phoneNumber,
+  address,
+  avatar
+) => {
   let valid = true;
   let errors = {
     firstNameError: "",
@@ -74,7 +84,7 @@ export const validateEditProfileForm = (firstName, lastName, phoneNumber, addres
     valid = false;
   }
 
-  if (phoneNumber.length!== 11) {
+  if (phoneNumber.length !== 11) {
     errors.phoneNumberError = "Phone number is needed to be 11 digits";
     valid = false;
   }
