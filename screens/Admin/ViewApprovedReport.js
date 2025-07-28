@@ -173,8 +173,12 @@ const ViewApprovedReport = ({ route }) => {
                   {detail.original}
                 </Text>
                 <Text style={styles.reportDescription}>
-                  <Text style={{ fontWeight: "bold" }}>Location: </Text>
+                  <Text style={{ fontWeight: "bold" }}>Street: </Text>
                   {detail.location}
+                </Text>
+                <Text style={styles.reportDescription}>
+                  <Text style={{ fontWeight: "bold" }}>Location: </Text>
+                  {detail.exactLocation || "Not specified"}
                 </Text>
                 <Text style={styles.reportDescription}>
                   <Text style={{ fontWeight: "bold" }}>Status: </Text>

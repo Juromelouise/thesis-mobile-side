@@ -1,4 +1,9 @@
-export const validateReportForm = (description, address, images) => {
+export const validateReportForm = (
+  description,
+  address,
+  images,
+  exactLocation
+) => {
   let valid = true;
   let errors = {
     descriptionError: "",

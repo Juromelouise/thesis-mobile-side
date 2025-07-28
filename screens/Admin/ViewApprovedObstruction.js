@@ -133,8 +133,10 @@ const ViewApprovedObstruction = ({ route }) => {
         Approved Complaint Report
       </Animated.Text>
       <Animated.View entering={FadeInUp} style={styles.reportCard}>
-        <Text style={styles.reportTitle}>Location:</Text>
+        <Text style={styles.reportTitle}>Street:</Text>
         <Text style={styles.reportDescription}>{report.location}</Text>
+        <Text style={styles.reportTitle}>Location:</Text>
+        <Text style={styles.reportDescription}>{report.exactLocation}</Text>
 
         <Text style={styles.reportTitle}>Complaint:</Text>
         <Text style={styles.reportDescription}>{report.original}</Text>

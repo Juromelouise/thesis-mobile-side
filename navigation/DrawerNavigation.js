@@ -1,10 +1,9 @@
 import "react-native-gesture-handler";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { NavigationContainer } from "@react-navigation/native";
 import React, { useContext, useState, useCallback } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import { MaterialIcons } from "react-native-vector-icons";
+import { MaterialIcons, FontAwesome5 } from "react-native-vector-icons";
 import { AuthContext } from "../context/AuthContext";
 import Navigator from "./Navigator";
 import {
@@ -164,7 +163,7 @@ const CustomDrawerContent = ({ navigation }) => {
       )} */}
 
         {/* Admin */}
-        {user && (user.role === "admin" || user.role === "superadmin") && (
+        {/* {user && (user.role === "admin" || user.role === "superadmin") && (
           <>
             <TouchableOpacity
               onPress={() => {
@@ -181,8 +180,8 @@ const CustomDrawerContent = ({ navigation }) => {
               <Text style={styles.drawerButtonText}>Admin</Text>
             </TouchableOpacity>
           </>
-        )}
-        {/* {user && (user.role === "admin" || user.role === "superadmin") && (
+        )} */}
+        {user && (user.role === "admin" || user.role === "superadmin") && (
         <>
           <TouchableOpacity
             onPress={() => setIsAdminDropdownOpen(!isAdminDropdownOpen)}
@@ -203,10 +202,10 @@ const CustomDrawerContent = ({ navigation }) => {
             />
           </TouchableOpacity>
         </>
-      )} */}
+      )}
 
         {/* Dropdown for Admin options */}
-        {/* {isAdminDropdownOpen && (
+        {isAdminDropdownOpen && (
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -219,15 +218,15 @@ const CustomDrawerContent = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("Approve Obstruction");
+              navigation.navigate("Approve Reports Location");
             }}
             style={styles.dropdownButton}
           >
-            <Icon name="road" size={16} color="#333" style={styles.icon} />
-            <Text style={styles.dropdownButtonText}>Approve Obstructions</Text>
+            <FontAwesome5 name="map-marker-alt" size={16} color="#333" style={styles.icon} />
+            <Text style={styles.dropdownButtonText}>Approve Locations</Text>
           </TouchableOpacity>
         </View>
-      )} */}
+      )}
 
         {/* Logout */}
         <TouchableOpacity
@@ -307,6 +306,12 @@ const DrawerNavigation = () => {
         component={Navigator}
         initialParams={{ screen: "StreetScreen" }}
         options={{ title: "Street Map" }}
+      />
+       <Drawer.Screen
+        name="Approve Reports Location"
+        component={Navigator}
+        initialParams={{ screen: "ApproveReportsLocation" }}
+        options={{ title: "Approve Reports Location" }}
       />
     </Drawer.Navigator>
   );
