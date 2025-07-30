@@ -9,25 +9,24 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import Gallery from "react-native-awesome-gallery";
 import { Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { BASE_URL } from "../../assets/common/config";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const ViewApprovedReport = ({ route }) => {
   const { report } = route.params;
-  console.log(report);
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [confirmationImages, setConfirmationImages] = useState([]);
+  const [users, setUsers] = useState([]);
   const navigation = useNavigation();
 
-  // Prepare gallery images from report.reportDetails[].images
   const galleryImages = useMemo(() => {
     if (report.reportDetails && Array.isArray(report.reportDetails)) {
       return report.reportDetails
@@ -37,7 +36,36 @@ const ViewApprovedReport = ({ route }) => {
     return [];
   }, [report.reportDetails]);
 
-  // Prepare confirmation images if any
+  async function getAllReporters(report) {
+    if (
+      !report ||
+      !report.reportDetails ||
+      !Array.isArray(report.reportDetails)
+    ) {
+      console.error("Invalid report object or missing reportDetails array");
+      return [];
+    }
+
+    const reporters = report.reportDetails.map((detail) => detail.reporter);
+
+    const filteredReporters = reporters.filter((reporter) => reporter);
+
+    const { data } = await axios.post(`${BASE_URL}/user/get-multiple-users`, {
+      ids: filteredReporters,
+    });
+    if (data.success) {
+      setUsers(data.users);
+    } else {
+      console.error("Failed to fetch reporters");
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getAllReporters(report);
+    }, [report])
+  );
+
   const [isConfirmationGalleryVisible, setIsConfirmationGalleryVisible] =
     useState(false);
   const [selectedConfirmationImageIndex, setSelectedConfirmationImageIndex] =
@@ -106,7 +134,7 @@ const ViewApprovedReport = ({ route }) => {
         });
       }
 
-      console.log(formData)
+      console.log(formData);
 
       setLoading(true);
 
@@ -168,6 +196,47 @@ const ViewApprovedReport = ({ route }) => {
           {report.reportDetails && Array.isArray(report.reportDetails) ? (
             report.reportDetails.map((detail, idx) => (
               <View key={idx} style={{ marginBottom: 10 }}>
+                {users.length > 0 && (
+                  <>
+                    <Text style={styles.sectionHeader}>
+                      Reporter Information:
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      {users[0].avatar?.url && (
+                        <Image
+                          source={{ uri: users[0].avatar.url }}
+                          style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 25,
+                            marginRight: 10,
+                          }}
+                        />
+                      )}
+                      <View>
+                        <Text style={styles.reportDescription}>
+                          <Text style={{ fontWeight: "bold" }}>Name: </Text>
+                          {`${users[0].firstName} ${users[0].lastName}`}
+                        </Text>
+                        <Text style={styles.reportDescription}>
+                          <Text style={{ fontWeight: "bold" }}>Email: </Text>
+                          {users[0].email}
+                        </Text>
+                        <Text style={styles.reportDescription}>
+                          <Text style={{ fontWeight: "bold" }}>Phone: </Text>
+                          {users[0].phoneNumber}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                )}
+
                 <Text style={styles.reportDescription}>
                   <Text style={{ fontWeight: "bold" }}>Description: </Text>
                   {detail.original}
@@ -185,7 +254,9 @@ const ViewApprovedReport = ({ route }) => {
                   {detail.status}
                 </Text>
                 <Text style={styles.reportDescription}>
-                  <Text style={{ fontWeight: "bold" }}>Reason of Approval: </Text>
+                  <Text style={{ fontWeight: "bold" }}>
+                    Reason of Approval:{" "}
+                  </Text>
                   {detail.reason}
                 </Text>
                 <Text style={styles.reportDescription}>
@@ -456,5 +527,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 100,
+  },
+  userInfoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    backgroundColor: "#f8f8f8",
+    padding: 10,
+    borderRadius: 8,
+  },
+  userTextContainer: {
+    flex: 1,
   },
 });
